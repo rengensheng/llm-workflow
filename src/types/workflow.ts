@@ -1,6 +1,6 @@
 export interface WorkflowNode {
   id: string;
-  type: 'llm' | 'tool' | 'conditional' | 'input' | 'output' | 'knowledge';
+  type: 'llm' | 'tool' | 'conditional' | 'input' | 'output' | 'knowledge' | 'loop';
   position: { x: number; y: number };
   data: {
     label: string;
@@ -95,4 +95,12 @@ export interface InputNodeData {
 export interface OutputNodeData {
   label: string;
   outputType: 'text' | 'file' | 'json';
+}
+
+export interface LoopNodeData {
+  label: string;
+  loopType: 'count' | 'condition';
+  maxIterations?: number;
+  condition?: string;
+  currentIteration?: number;
 }

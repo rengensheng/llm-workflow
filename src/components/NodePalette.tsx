@@ -1,4 +1,4 @@
-import { Brain, Wrench, GitBranch, Upload, Download } from 'lucide-react';
+import { Brain, Wrench, GitBranch, Upload, Download, Repeat } from 'lucide-react';
 import type { WorkflowNode } from '../types/workflow';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -65,6 +65,19 @@ const nodeTypes = [
       outputType: 'text',
     },
   },
+  {
+    type: 'loop',
+    label: 'Loop',
+    icon: Repeat,
+    color: 'orange',
+    defaultData: {
+      label: 'Loop',
+      loopType: 'count',
+      maxIterations: 5,
+      condition: '',
+      currentIteration: 0,
+    },
+  },
 ];
 
 export default function NodePalette({ onAddNode }: NodePaletteProps) {
@@ -99,6 +112,7 @@ export default function NodePalette({ onAddNode }: NodePaletteProps) {
             green: 'border-green-400 text-green-600 hover:bg-green-50',
             purple: 'border-purple-400 text-purple-600 hover:bg-purple-50',
             red: 'border-red-400 text-red-600 hover:bg-red-50',
+            orange: 'border-orange-400 text-orange-600 hover:bg-orange-50',
           }[nodeType.color];
 
           return (

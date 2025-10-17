@@ -20,6 +20,7 @@ import ToolNode from './nodes/ToolNode';
 import ConditionalNode from './nodes/ConditionalNode';
 import InputNode from './nodes/InputNode';
 import OutputNode from './nodes/OutputNode';
+import LoopNode from './nodes/LoopNode';
 
 const nodeTypes: NodeTypes = {
   llm: LLMNode,
@@ -27,6 +28,7 @@ const nodeTypes: NodeTypes = {
   conditional: ConditionalNode,
   userInput: InputNode,
   userOutput: OutputNode,
+  loop: LoopNode,
 };
 
 interface WorkflowCanvasProps {

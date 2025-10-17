@@ -276,6 +276,56 @@ export default function NodePropertiesPanel({
           </div>
         );
 
+      case 'loop':
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                循环类型
+              </label>
+              <select
+                value={selectedNode.data.loopType || 'count'}
+                onChange={(e) => handlePropertyChange('loopType', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="count">计数循环</option>
+                <option value="condition">条件循环</option>
+              </select>
+            </div>
+
+            {selectedNode.data.loopType === 'count' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  最大迭代次数
+                </label>
+                <input
+                  type="number"
+                  value={selectedNode.data.maxIterations || 5}
+                  onChange={(e) => handlePropertyChange('maxIterations', parseInt(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  min={1}
+                  max={100}
+                />
+              </div>
+            )}
+
+            {selectedNode.data.loopType === 'condition' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  循环条件
+                </label>
+                <input
+                  type="text"
+                  value={selectedNode.data.condition || ''}
+                  onChange={(e) => handlePropertyChange('condition', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="例如: iteration < 10"
+                />
+              </div>
+            )}
+          </div>
+        );
+
       default:
         return (
           <div className="text-gray-500 text-sm">
