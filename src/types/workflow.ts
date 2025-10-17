@@ -26,6 +26,33 @@ export interface Workflow {
   updatedAt: string;
 }
 
+export interface ToolCall {
+  name: string;
+  description: string;
+  parameters: Record<string, any>;
+  enabled: boolean;
+}
+
+export interface JsonSchemaField {
+  id: string;
+  name: string;
+  type: 'string' | 'number' | 'boolean' | 'array' | 'object';
+  description?: string;
+  required: boolean;
+  defaultValue?: any;
+  enum?: string[];
+  minLength?: number;
+  maxLength?: number;
+  minimum?: number;
+  maximum?: number;
+}
+
+export interface JsonSchemaConfig {
+  title?: string;
+  description?: string;
+  fields: JsonSchemaField[];
+}
+
 export interface LLMNodeData {
   label: string;
   model: string;
@@ -33,6 +60,17 @@ export interface LLMNodeData {
   maxTokens: number;
   systemPrompt: string;
   userPrompt: string;
+  // 工具调用配置
+  enableToolCalls: boolean;
+  tools: ToolCall[];
+  // 输出格式配置
+  outputFormat: 'text' | 'json';
+  jsonSchema?: string;
+  jsonSchemaConfig?: JsonSchemaConfig;
+  // 高级配置
+  topP?: number;
+  frequencyPenalty?: number;
+  presencePenalty?: number;
 }
 
 export interface ToolNodeData {

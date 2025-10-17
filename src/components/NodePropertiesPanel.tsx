@@ -1,5 +1,7 @@
 import { X } from 'lucide-react';
+import { Input, Select, Switch, Textarea } from './ui';
 import type { WorkflowNode } from '../types/workflow';
+import JsonSchemaConfig from './JsonSchemaConfig';
 
 interface NodePropertiesPanelProps {
   selectedNode: WorkflowNode | null;
@@ -33,77 +35,152 @@ export default function NodePropertiesPanel({
       case 'llm':
         return (
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                模型
-              </label>
-              <select
-                value={selectedNode.data.model || 'gpt-4'}
-                onChange={(e) => handlePropertyChange('model', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="gpt-4">GPT-4</option>
-                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                <option value="claude-3">Claude-3</option>
-                <option value="gemini-pro">Gemini Pro</option>
-              </select>
+            <Select
+              label="模型"
+              value={selectedNode.data.model || 'gpt-4'}
+              onChange={(value) => handlePropertyChange('model', value)}
+              options={[
+                { value: 'gpt-4', label: 'GPT-4' },
+                { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
+                { value: 'claude-3', label: 'Claude-3' },
+                { value: 'gemini-pro', label: 'Gemini Pro' },
+                { value: 'qwen', label: 'Qwen' },
+                { value: 'ernie', label: '文心一言' },
+              ]}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  温度: {selectedNode.data.temperature || 0.7}
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={selectedNode.data.temperature || 0.7}
+                  onChange={(e) => handlePropertyChange('temperature', parseFloat(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+
+              <Input
+                label="最大令牌数"
+                type="number"
+                value={selectedNode.data.maxTokens || 1000}
+                onChange={(value) => handlePropertyChange('maxTokens', parseInt(value))}
+              />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                温度
-              </label>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.1"
-                value={selectedNode.data.temperature || 0.7}
-                onChange={(e) => handlePropertyChange('temperature', parseFloat(e.target.value))}
-                className="w-full"
+            {/* 输出格式配置 */}
+            <Select
+              label="输出格式"
+              value={selectedNode.data.outputFormat || 'text'}
+              onChange={(value) => handlePropertyChange('outputFormat', value)}
+              options={[
+                { value: 'text', label: '文本' },
+                { value: 'json', label: 'JSON' },
+              ]}
+            />
+
+            {selectedNode.data.outputFormat === 'json' && (
+              <JsonSchemaConfig config={{
+                title: selectedNode.data.jsonSchema?.title || '',
+                description: selectedNode.data.jsonSchema?.description || '',
+                fields: selectedNode.data.jsonSchema?.fields || [],
+              }} onChange={() => {}} />
+            )}
+
+            {/* 工具调用配置 */}
+            <div className="border-t pt-4">
+              <Switch
+                checked={selectedNode.data.enableToolCalls || false}
+                onChange={(checked) => handlePropertyChange('enableToolCalls', checked)}
+                label="工具调用"
+                description="启用工具调用功能"
               />
-              <div className="text-xs text-gray-500 text-center">
-                {selectedNode.data.temperature || 0.7}
+
+              {selectedNode.data.enableToolCalls && (
+                <div className="space-y-3">
+                  <div className="text-sm text-gray-600 mb-2">
+                    可用的工具:
+                  </div>
+                  
+                  {/* 预设工具 */}
+                  {[
+                    { name: 'web_search', description: '网页搜索', enabled: false },
+                    { name: 'calculator', description: '计算器', enabled: false },
+                    { name: 'file_reader', description: '文件读取', enabled: false },
+                    { name: 'api_call', description: 'API 调用', enabled: false },
+                  ].map((tool, index) => (
+                    <div key={index} className="flex items-center space-x-3 p-2 border border-gray-200 rounded">
+                      <input
+                        type="checkbox"
+                        checked={selectedNode.data.tools?.some((t: any) => t.name === tool.name && t.enabled) || false}
+                        onChange={(e) => {
+                          const currentTools = selectedNode.data.tools || [];
+                          const updatedTools = e.target.checked
+                            ? [...currentTools.filter((t: any) => t.name !== tool.name), { ...tool, enabled: true, parameters: {} }]
+                            : currentTools.filter((t: any) => t.name !== tool.name);
+                          handlePropertyChange('tools', updatedTools);
+                        }}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-gray-900">{tool.description}</div>
+                        <div className="text-xs text-gray-500">{tool.name}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 高级配置 */}
+            <div className="border-t pt-4">
+              <div className="text-sm font-medium text-gray-700 mb-3">高级配置</div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="Top P"
+                  type="number"
+                  value={selectedNode.data.topP || 1.0}
+                  onChange={(value) => handlePropertyChange('topP', parseFloat(value))}
+                  min={0}
+                  max={1}
+                  step={0.1}
+                  className="text-sm"
+                />
+
+                <Input
+                  label="频率惩罚"
+                  type="number"
+                  value={selectedNode.data.frequencyPenalty || 0}
+                  onChange={(value) => handlePropertyChange('frequencyPenalty', parseFloat(value))}
+                  min={-2}
+                  max={2}
+                  step={0.1}
+                  className="text-sm"
+                />
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                最大令牌数
-              </label>
-              <input
-                type="number"
-                value={selectedNode.data.maxTokens || 1000}
-                onChange={(e) => handlePropertyChange('maxTokens', parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+            <Textarea
+              label="系统提示"
+              value={selectedNode.data.systemPrompt || ''}
+              onChange={(value) => handlePropertyChange('systemPrompt', value)}
+              rows={3}
+              placeholder="输入系统提示..."
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                系统提示
-              </label>
-              <textarea
-                value={selectedNode.data.systemPrompt || ''}
-                onChange={(e) => handlePropertyChange('systemPrompt', e.target.value)}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="输入系统提示..."
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                用户提示
-              </label>
-              <textarea
-                value={selectedNode.data.userPrompt || ''}
-                onChange={(e) => handlePropertyChange('userPrompt', e.target.value)}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="输入用户提示..."
-              />
-            </div>
+            <Textarea
+              label="用户提示"
+              value={selectedNode.data.userPrompt || ''}
+              onChange={(value) => handlePropertyChange('userPrompt', value)}
+              rows={3}
+              placeholder="输入用户提示..."
+            />
           </div>
         );
 
@@ -226,18 +303,12 @@ export default function NodePropertiesPanel({
       </div>
 
       <div className="p-4 space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            节点名称
-          </label>
-          <input
-            type="text"
-            value={selectedNode.data.label || ''}
-            onChange={(e) => handleLabelChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="输入节点名称..."
-          />
-        </div>
+        <Input
+          label="节点名称"
+          value={selectedNode.data.label || ''}
+          onChange={handleLabelChange}
+          placeholder="输入节点名称..."
+        />
 
         {renderNodeProperties()}
       </div>

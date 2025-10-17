@@ -1,4 +1,5 @@
 import { Save, Play, Settings, Download, Upload } from 'lucide-react';
+import { Button } from './ui';
 import type { Workflow } from '../types/workflow';
 
 interface WorkflowToolbarProps {
@@ -55,37 +56,47 @@ export default function WorkflowToolbar({ onSave, onRun, workflow }: WorkflowToo
       </label>
 
       {/* Export Button */}
-      <button
+      <Button
+        variant="secondary"
+        size="md"
         onClick={handleExport}
-        className="flex items-center space-x-2 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+        className="flex items-center space-x-2"
       >
         <Download className="w-4 h-4" />
         <span>Export</span>
-      </button>
+      </Button>
 
       {/* Save Button */}
-      <button
+      <Button
+        variant="primary"
+        size="md"
         onClick={onSave}
-        className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
+        className="flex items-center space-x-2"
       >
         <Save className="w-4 h-4" />
         <span>Save</span>
-      </button>
+      </Button>
 
       {/* Run Button */}
-      <button
+      <Button
+        variant="primary"
+        size="md"
         onClick={onRun}
-        className="flex items-center space-x-2 px-3 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700"
+        className="flex items-center space-x-2 bg-green-600 hover:bg-green-700"
       >
         <Play className="w-4 h-4" />
         <span>Run</span>
-      </button>
+      </Button>
 
       {/* Settings Button */}
-      <button className="flex items-center space-x-2 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+      <Button
+        variant="secondary"
+        size="md"
+        className="flex items-center space-x-2"
+      >
         <Settings className="w-4 h-4" />
         <span>Settings</span>
-      </button>
+      </Button>
     </div>
   );
 }
