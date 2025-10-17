@@ -1,26 +1,29 @@
 import { X } from 'lucide-react';
 import { Input, Select, Switch, Textarea } from './ui';
-import type { WorkflowNode } from '../types/workflow';
-import JsonSchemaConfig from './JsonSchemaConfig';
+import { VariableInput } from './VariableHighlighter';
+import type { WorkflowNode, WorkflowVariable } from '../types/workflow';
 
 interface NodePropertiesPanelProps {
   selectedNode: WorkflowNode | null;
   onUpdateNode: (nodeId: string, updates: Partial<WorkflowNode>) => void;
   onClose: () => void;
+  availableVariables?: WorkflowVariable[];
+  onCreateVariable?: (variable: Omit<WorkflowVariable, 'id'>) => string;
 }
 
 export default function NodePropertiesPanel({
   selectedNode,
   onUpdateNode,
   onClose,
+  availableVariables = [],
 }: NodePropertiesPanelProps) {
   if (!selectedNode) {
     return null;
   }
 
-  const handleLabelChange = (label: string) => {
+  const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onUpdateNode(selectedNode.id, {
-      data: { ...selectedNode.data, label },
+      data: { ...selectedNode.data, label: e.target.value },
     });
   };
 
@@ -35,19 +38,23 @@ export default function NodePropertiesPanel({
       case 'llm':
         return (
           <div className="space-y-4">
-            <Select
-              label="模型"
-              value={selectedNode.data.model || 'gpt-4'}
-              onChange={(value) => handlePropertyChange('model', value)}
-              options={[
-                { value: 'gpt-4', label: 'GPT-4' },
-                { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
-                { value: 'claude-3', label: 'Claude-3' },
-                { value: 'gemini-pro', label: 'Gemini Pro' },
-                { value: 'qwen', label: 'Qwen' },
-                { value: 'ernie', label: '文心一言' },
-              ]}
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                模型
+              </label>
+              <Select
+                value={selectedNode.data.model || 'gpt-4'}
+                onChange={(value) => handlePropertyChange('model', value)}
+                options={[
+                  { value: 'gpt-4', label: 'GPT-4' },
+                  { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
+                  { value: 'claude-3', label: 'Claude-3' },
+                  { value: 'gemini-pro', label: 'Gemini Pro' },
+                  { value: 'qwen', label: 'Qwen' },
+                  { value: 'ernie', label: '文心一言' },
+                ]}
+              />
+            </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -69,37 +76,43 @@ export default function NodePropertiesPanel({
                 label="最大令牌数"
                 type="number"
                 value={selectedNode.data.maxTokens || 1000}
-                onChange={(value) => handlePropertyChange('maxTokens', parseInt(value))}
+                onChange={(e) => handlePropertyChange('maxTokens', parseInt(e.target.value))}
               />
             </div>
 
             {/* 输出格式配置 */}
-            <Select
-              label="输出格式"
-              value={selectedNode.data.outputFormat || 'text'}
-              onChange={(value) => handlePropertyChange('outputFormat', value)}
-              options={[
-                { value: 'text', label: '文本' },
-                { value: 'json', label: 'JSON' },
-              ]}
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                输出格式
+              </label>
+              <Select
+                value={selectedNode.data.outputFormat || 'text'}
+                onChange={(value) => handlePropertyChange('outputFormat', value)}
+                options={[
+                  { value: 'text', label: '文本' },
+                  { value: 'json', label: 'JSON' },
+                ]}
+              />
+            </div>
 
             {selectedNode.data.outputFormat === 'json' && (
-              <JsonSchemaConfig config={{
-                title: selectedNode.data.jsonSchema?.title || '',
-                description: selectedNode.data.jsonSchema?.description || '',
-                fields: selectedNode.data.jsonSchema?.fields || [],
-              }} onChange={() => {}} />
+              <div className="text-sm text-gray-500 p-2 border border-gray-200 rounded">
+                JSON Schema 配置功能暂未实现
+              </div>
             )}
 
             {/* 工具调用配置 */}
             <div className="border-t pt-4">
-              <Switch
-                checked={selectedNode.data.enableToolCalls || false}
-                onChange={(checked) => handlePropertyChange('enableToolCalls', checked)}
-                label="工具调用"
-                description="启用工具调用功能"
-              />
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium text-gray-700">工具调用</div>
+                  <div className="text-xs text-gray-500">启用工具调用功能</div>
+                </div>
+                <Switch
+                  checked={selectedNode.data.enableToolCalls || false}
+                  onChange={(checked) => handlePropertyChange('enableToolCalls', checked)}
+                />
+              </div>
 
               {selectedNode.data.enableToolCalls && (
                 <div className="space-y-3">
@@ -146,7 +159,7 @@ export default function NodePropertiesPanel({
                   label="Top P"
                   type="number"
                   value={selectedNode.data.topP || 1.0}
-                  onChange={(value) => handlePropertyChange('topP', parseFloat(value))}
+                  onChange={(e) => handlePropertyChange('topP', parseFloat(e.target.value))}
                   min={0}
                   max={1}
                   step={0.1}
@@ -157,7 +170,7 @@ export default function NodePropertiesPanel({
                   label="频率惩罚"
                   type="number"
                   value={selectedNode.data.frequencyPenalty || 0}
-                  onChange={(value) => handlePropertyChange('frequencyPenalty', parseFloat(value))}
+                  onChange={(e) => handlePropertyChange('frequencyPenalty', parseFloat(e.target.value))}
                   min={-2}
                   max={2}
                   step={0.1}
@@ -169,7 +182,7 @@ export default function NodePropertiesPanel({
             <Textarea
               label="系统提示"
               value={selectedNode.data.systemPrompt || ''}
-              onChange={(value) => handlePropertyChange('systemPrompt', value)}
+              onChange={(e) => handlePropertyChange('systemPrompt', e.target.value)}
               rows={3}
               placeholder="输入系统提示..."
             />
@@ -177,10 +190,27 @@ export default function NodePropertiesPanel({
             <Textarea
               label="用户提示"
               value={selectedNode.data.userPrompt || ''}
-              onChange={(value) => handlePropertyChange('userPrompt', value)}
+              onChange={(e) => handlePropertyChange('userPrompt', e.target.value)}
               rows={3}
               placeholder="输入用户提示..."
             />
+
+            {/* 输出变量配置 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                输出变量名
+              </label>
+              <input
+                type="text"
+                value={selectedNode.data.outputVariable || ''}
+                onChange={(e) => handlePropertyChange('outputVariable', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="例如: response"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                设置变量名后，其他节点可以通过 {'{'}{'{'}变量名{'}'}{'}'} 引用此LLM输出
+              </p>
+            </div>
           </div>
         );
 
@@ -212,13 +242,16 @@ export default function NodePropertiesPanel({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 条件表达式
               </label>
-              <input
-                type="text"
+              <VariableInput
                 value={selectedNode.data.condition || ''}
-                onChange={(e) => handlePropertyChange('condition', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="例如: input.length > 10"
+                onChange={(value) => handlePropertyChange('condition', value)}
+                variables={availableVariables || []}
+                placeholder="例如: {{input}}.length > 10 或 {{count}} < 5"
+                className="w-full"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                使用 {'{'}{'{'}变量名{'}'}{'}'} 格式引用变量，输入 {'{'}{'{'} 或 $ 触发变量提示
+              </p>
             </div>
           </div>
         );
@@ -252,6 +285,23 @@ export default function NodePropertiesPanel({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="输入默认值..."
               />
+            </div>
+
+            {/* 输出变量配置 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                输出变量名
+              </label>
+              <input
+                type="text"
+                value={selectedNode.data.outputVariable || ''}
+                onChange={(e) => handlePropertyChange('outputVariable', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="例如: input"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                设置变量名后，其他节点可以通过 {'{'}{'{'}变量名{'}'}{'}'} 引用此输入值
+              </p>
             </div>
           </div>
         );
@@ -314,15 +364,120 @@ export default function NodePropertiesPanel({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   循环条件
                 </label>
-                <input
-                  type="text"
+                <VariableInput
                   value={selectedNode.data.condition || ''}
-                  onChange={(e) => handlePropertyChange('condition', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="例如: iteration < 10"
+                  onChange={(value) => handlePropertyChange('condition', value)}
+                  variables={availableVariables || []}
+                  placeholder="例如: {{iteration}} < 10 或 {{item}}.length > 0"
+                  className="w-full"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  使用 {'{'}{'{'}变量名{'}'}{'}'} 格式引用变量
+                </p>
               </div>
             )}
+
+            {/* 最大词语数配置 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                最大词语数
+              </label>
+              <input
+                type="number"
+                value={selectedNode.data.maxWordCount || 1000}
+                onChange={(e) => handlePropertyChange('maxWordCount', parseInt(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min={1}
+                max={10000}
+                placeholder="限制循环处理的总词语数"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                限制循环处理的总词语数，防止无限循环
+              </p>
+            </div>
+
+            {/* 运行条件配置 */}
+            <div className="border-t pt-4">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    运行条件
+                  </label>
+                  <p className="text-xs text-gray-500">
+                    控制循环是否运行的额外条件
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={selectedNode.data.runningConditions?.enabled || false}
+                  onChange={(e) => {
+                    const currentConditions = selectedNode.data.runningConditions || {
+                      enabled: false,
+                      condition: '',
+                      description: '',
+                    };
+                    handlePropertyChange('runningConditions', {
+                      ...currentConditions,
+                      enabled: e.target.checked,
+                    });
+                  }}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+              </div>
+
+              {selectedNode.data.runningConditions?.enabled && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      条件表达式
+                    </label>
+                    <VariableInput
+                      value={selectedNode.data.runningConditions.condition || ''}
+                      onChange={(value) => {
+                        const currentConditions = selectedNode.data.runningConditions || {
+                          enabled: true,
+                          condition: '',
+                          description: '',
+                        };
+                        handlePropertyChange('runningConditions', {
+                          ...currentConditions,
+                          condition: value,
+                        });
+                      }}
+                      variables={availableVariables || []}
+                      placeholder="例如: {{input}}.length > 0 && {{iteration}} < 5"
+                      className="w-full"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      使用 {'{'}{'{'}变量名{'}'}{'}'} 格式引用变量
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      条件描述
+                    </label>
+                    <input
+                      type="text"
+                      value={selectedNode.data.runningConditions.description || ''}
+                      onChange={(e) => {
+                        const currentConditions = selectedNode.data.runningConditions || {
+                          enabled: true,
+                          condition: '',
+                          description: '',
+                        };
+                        handlePropertyChange('runningConditions', {
+                          ...currentConditions,
+                          description: e.target.value,
+                        });
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="例如: 当输入不为空且迭代次数小于5时运行"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         );
 

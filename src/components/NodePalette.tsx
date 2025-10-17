@@ -76,6 +76,12 @@ const nodeTypes = [
       maxIterations: 5,
       condition: '',
       currentIteration: 0,
+      maxWordCount: 1000,
+      runningConditions: {
+        enabled: false,
+        condition: '',
+        description: '',
+      },
     },
   },
 ];

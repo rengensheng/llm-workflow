@@ -20,6 +20,7 @@ export default function WorkflowList() {
       description: '',
       nodes: [],
       edges: [],
+      variables: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

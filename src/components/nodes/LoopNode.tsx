@@ -64,6 +64,18 @@ export default function LoopNode({ data }: NodeProps<LoopNodeData>) {
                 条件: {data.condition.substring(0, 25)}...
               </div>
             )}
+            {data.maxWordCount && (
+              <div className="flex justify-between">
+                <span>最大词语:</span>
+                <span className="text-white">{data.maxWordCount}</span>
+              </div>
+            )}
+            {data.runningConditions?.enabled && (
+              <div className="flex justify-between">
+                <span>运行条件:</span>
+                <span className="text-green-400">已启用</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

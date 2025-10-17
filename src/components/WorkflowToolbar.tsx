@@ -1,4 +1,4 @@
-import { Save, Play, Settings, Download, Upload } from 'lucide-react';
+import { Save, Play, Settings, Download, Upload, Variable } from 'lucide-react';
 import { Button } from './ui';
 import type { Workflow } from '../types/workflow';
 
@@ -6,9 +6,16 @@ interface WorkflowToolbarProps {
   onSave: () => void;
   onRun: () => void;
   workflow: Workflow;
+  onToggleVariables?: () => void;
 }
 
-export default function WorkflowToolbar({ onSave, onRun, workflow }: WorkflowToolbarProps) {
+interface WorkflowToolbarProps {
+  onSave: () => void;
+  onRun: () => void;
+  workflow: Workflow;
+}
+
+export default function WorkflowToolbar({ onSave, onRun, workflow, onToggleVariables }: WorkflowToolbarProps) {
   const handleExport = () => {
     const dataStr = JSON.stringify(workflow, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -86,6 +93,17 @@ export default function WorkflowToolbar({ onSave, onRun, workflow }: WorkflowToo
       >
         <Play className="w-4 h-4" />
         <span>Run</span>
+      </Button>
+
+      {/* Variables Button */}
+      <Button
+        variant="secondary"
+        size="md"
+        onClick={onToggleVariables}
+        className="flex items-center space-x-2"
+      >
+        <Variable className="w-4 h-4" />
+        <span>Variables</span>
       </Button>
 
       {/* Settings Button */}

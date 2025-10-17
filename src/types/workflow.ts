@@ -16,12 +16,22 @@ export interface WorkflowEdge {
   targetHandle?: string;
 }
 
+export interface WorkflowVariable {
+  id: string;
+  name: string;
+  type: 'string' | 'number' | 'boolean' | 'array' | 'object';
+  value?: any;
+  description?: string;
+  nodeId?: string; // 创建该变量的节点ID
+}
+
 export interface Workflow {
   id: string;
   name: string;
   description?: string;
   nodes: WorkflowNode[];
   edges: WorkflowEdge[];
+  variables: WorkflowVariable[];
   createdAt: string;
   updatedAt: string;
 }
@@ -71,6 +81,8 @@ export interface LLMNodeData {
   topP?: number;
   frequencyPenalty?: number;
   presencePenalty?: number;
+  // 变量输出
+  outputVariable?: string;
 }
 
 export interface ToolNodeData {
@@ -90,6 +102,7 @@ export interface InputNodeData {
   label: string;
   inputType: 'text' | 'file' | 'url';
   defaultValue?: string;
+  outputVariable?: string; // 输出变量名
 }
 
 export interface OutputNodeData {
@@ -103,4 +116,11 @@ export interface LoopNodeData {
   maxIterations?: number;
   condition?: string;
   currentIteration?: number;
+  // 新增字段：最大词语数和运行条件
+  maxWordCount?: number;
+  runningConditions?: {
+    enabled: boolean;
+    condition: string;
+    description?: string;
+  };
 }
