@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { ReactFlowProvider } from 'reactflow';
+import { ReactFlowProvider, useNodesState, useEdgesState } from 'reactflow';
 import type { Workflow, WorkflowNode, WorkflowEdge, WorkflowVariable } from '../types/workflow';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -10,17 +10,17 @@ import NodePropertiesPanel from '../components/NodePropertiesPanel';
 import VariablePanel from '../components/VariablePanel';
 
 export default function WorkflowBuilder() {
+
+  const [nodes, setNodes, onNodesChangeInternal] = useNodesState([]);
+  const [edges, setEdges, onEdgesChangeInternal] = useEdgesState([]);
   const [workflow, setWorkflow] = useState<Workflow>({
     id: uuidv4(),
     name: 'New Workflow',
     description: '',
-    nodes: [],
-    edges: [],
     variables: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   });
-
   const [selectedNode, setSelectedNode] = useState<WorkflowNode | null>(null);
   const [showVariablePanel, setShowVariablePanel] = useState(false);
 
@@ -30,7 +30,7 @@ export default function WorkflowBuilder() {
       nodes,
       updatedAt: new Date().toISOString(),
     }));
-    
+
     // 如果选中的节点被更新了，更新选中节点的状态
     if (selectedNode) {
       const updatedNode = nodes.find(node => node.id === selectedNode.id);
@@ -45,16 +45,15 @@ export default function WorkflowBuilder() {
   }, [workflow]);
 
   const handleUpdateNode = useCallback((nodeId: string, updates: Partial<WorkflowNode>) => {
-    const oldNode = workflow.nodes.find(node => node.id === nodeId);
-    
+    const oldNode = nodes.find(node => node.id === nodeId);
+
     setWorkflow(prev => ({
       ...prev,
-      nodes: prev.nodes.map(node => 
-        node.id === nodeId ? { ...node, ...updates } : node
-      ),
       updatedAt: new Date().toISOString(),
     }));
-    
+    setNodes(nodes.map(node =>
+      node.id === nodeId ? { ...node, ...updates } : node
+    ))
     // 更新选中的节点
     if (selectedNode && selectedNode.id === nodeId) {
       setSelectedNode(prev => prev ? { ...prev, ...updates } : null);
@@ -64,7 +63,7 @@ export default function WorkflowBuilder() {
     if (oldNode && updates.data) {
       const oldVariableName = oldNode.data.outputVariable;
       const newVariableName = updates.data.outputVariable;
-      
+
       // 如果变量名发生变化
       if (oldVariableName !== newVariableName) {
         setWorkflow(prev => {
@@ -84,7 +83,7 @@ export default function WorkflowBuilder() {
             };
             updatedVariables.push(newVariable);
           }
-          
+
           return {
             ...prev,
             variables: updatedVariables,
@@ -93,20 +92,11 @@ export default function WorkflowBuilder() {
         });
       }
     }
-  }, [selectedNode, workflow.nodes, workflow.variables]);
-
-  const handleEdgesChange = useCallback((edges: WorkflowEdge[]) => {
-    setWorkflow(prev => ({
-      ...prev,
-      edges,
-      updatedAt: new Date().toISOString(),
-    }));
-  }, []);
+  }, [selectedNode, nodes, workflow.variables]);
 
   const handleAddNode = useCallback((node: WorkflowNode) => {
     setWorkflow(prev => ({
       ...prev,
-      nodes: [...prev.nodes, node],
       updatedAt: new Date().toISOString(),
     }));
 
@@ -119,7 +109,7 @@ export default function WorkflowBuilder() {
         nodeId: node.id,
         description: `由 ${node.data.label} 节点创建`,
       };
-      
+
       setWorkflow(prev => ({
         ...prev,
         variables: [...prev.variables, newVariable],
@@ -132,13 +122,13 @@ export default function WorkflowBuilder() {
     // Save workflow to localStorage for demo purposes
     const workflows = JSON.parse(localStorage.getItem('workflows') || '[]');
     const existingIndex = workflows.findIndex((w: Workflow) => w.id === workflow.id);
-    
+
     if (existingIndex >= 0) {
       workflows[existingIndex] = workflow;
     } else {
       workflows.push(workflow);
     }
-    
+
     localStorage.setItem('workflows', JSON.stringify(workflows));
     alert('Workflow saved successfully!');
   }, [workflow]);
@@ -149,20 +139,20 @@ export default function WorkflowBuilder() {
       ...variable,
       id: uuidv4(),
     };
-    
+
     setWorkflow(prev => ({
       ...prev,
       variables: [...prev.variables, newVariable],
       updatedAt: new Date().toISOString(),
     }));
-    
+
     return newVariable.id;
   }, []);
 
   const handleUpdateVariable = useCallback((variableId: string, updates: Partial<WorkflowVariable>) => {
     setWorkflow(prev => ({
       ...prev,
-      variables: prev.variables.map(variable => 
+      variables: prev.variables.map(variable =>
         variable.id === variableId ? { ...variable, ...updates } : variable
       ),
       updatedAt: new Date().toISOString(),
@@ -179,7 +169,7 @@ export default function WorkflowBuilder() {
 
   // 获取节点可用的变量
   const getAvailableVariables = useCallback((nodeId: string) => {
-    const node = workflow.nodes.find(n => n.id === nodeId);
+    const node = nodes.find(n => n.id === nodeId);
     if (!node) return [];
 
     // 获取该节点之前的所有节点输出的变量
@@ -192,28 +182,28 @@ export default function WorkflowBuilder() {
     });
 
     return availableVariables;
-  }, [workflow.nodes, workflow.variables]);
+  }, [nodes, workflow.variables]);
 
   // 获取节点的前驱节点
   const getPreviousNodes = useCallback((nodeId: string) => {
-    const edgesToNode = workflow.edges.filter(edge => edge.target === nodeId);
-    const previousNodes = edgesToNode.map(edge => 
-      workflow.nodes.find(node => node.id === edge.source)
+    const edgesToNode = edges.filter(edge => edge.target === nodeId);
+    const previousNodes = edgesToNode.map(edge =>
+      nodes.find(node => node.id === edge.source)
     ).filter(Boolean) as WorkflowNode[];
-    
+
     return previousNodes;
-  }, [workflow.nodes, workflow.edges]);
+  }, [nodes, edges]);
 
   const handleRunWorkflow = useCallback(() => {
     // Basic validation
-    if (workflow.nodes.length === 0) {
+    if (nodes.length === 0) {
       alert('Please add at least one node to the workflow');
       return;
     }
 
     // Check if there's at least one input and output node
-    const hasInput = workflow.nodes.some(node => node.type === 'userInput');
-    const hasOutput = workflow.nodes.some(node => node.type === 'userOutput');
+    const hasInput = nodes.some(node => node.type === 'userInput');
+    const hasOutput = nodes.some(node => node.type === 'userOutput');
 
     if (!hasInput) {
       alert('Please add an input node to start the workflow');
@@ -252,15 +242,17 @@ export default function WorkflowBuilder() {
       <div className="flex flex-1 overflow-hidden">
         {/* Node Palette */}
         <NodePalette onAddNode={handleAddNode} />
-        
+
         {/* Workflow Canvas */}
         <div className="flex-1">
           <ReactFlowProvider>
             <WorkflowCanvas
-              initialNodes={workflow.nodes}
-              initialEdges={workflow.edges}
-              onNodesChange={handleNodesChange}
-              onEdgesChange={handleEdgesChange}
+              nodes={nodes}
+              edges={edges}
+              setNodes={setNodes}
+              setEdges={setEdges}
+              onNodesChangeInternal={onNodesChangeInternal}
+              onEdgesChangeInternal={onEdgesChangeInternal}
               onAddNode={handleAddNode}
               onNodeSelect={handleNodeSelect}
             />

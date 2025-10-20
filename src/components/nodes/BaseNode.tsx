@@ -5,7 +5,7 @@ import type { NodeProps } from 'reactflow';
 interface BaseNodeProps extends NodeProps {
   icon: React.ReactNode;
   title: string;
-  subtitle?: string;
+  subtitle?: any;
   status?: 'idle' | 'running' | 'success' | 'error';
   gradient?: string;
   children?: React.ReactNode;

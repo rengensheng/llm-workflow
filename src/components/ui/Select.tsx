@@ -1,5 +1,6 @@
 import { Select as HeadlessSelect, Field, Label, Description } from '@headlessui/react';
 import { ChevronDown } from 'lucide-react';
+import type React from 'react';
 import type { ComponentProps, ReactNode } from 'react';
 
 export type SelectSize = 'sm' | 'md' | 'lg';
@@ -17,6 +18,8 @@ export interface SelectProps extends Omit<ComponentProps<typeof HeadlessSelect>,
   size?: SelectSize;
   options: SelectOption[];
   placeholder?: string;
+  value?: string | null;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const sizeStyles: Record<SelectSize, string> = {

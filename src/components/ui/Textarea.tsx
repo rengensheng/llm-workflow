@@ -10,6 +10,9 @@ export interface TextareaProps extends Omit<ComponentProps<typeof HeadlessTextar
   error?: string;
   variant?: TextareaVariant;
   resize?: 'none' | 'vertical' | 'horizontal' | 'both';
+  value?: string | null;
+  placeholder?: string;
+  onChange: (e:React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const variantStyles: Record<TextareaVariant, string> = {
@@ -42,7 +45,6 @@ export function Textarea({
   variant = 'default',
   resize = 'vertical',
   disabled,
-  rows = 4,
   ...props
 }: TextareaProps) {
   const hasError = !!error;
@@ -56,7 +58,6 @@ export function Textarea({
       )}
       <HeadlessTextarea
         disabled={disabled}
-        rows={rows}
         className={`
           w-full px-4 py-3 text-base
           ${variantStyles[variant]}

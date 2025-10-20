@@ -27,7 +27,8 @@ export default function NodePropertiesPanel({
     });
   };
 
-  const handlePropertyChange = (key: string, value: any) => {
+  const handlePropertyChange = (key: string, value: string | number | boolean) => {
+    console.log('修改至', key, value)
     onUpdateNode(selectedNode.id, {
       data: { ...selectedNode.data, [key]: value },
     });
@@ -44,7 +45,7 @@ export default function NodePropertiesPanel({
               </label>
               <Select
                 value={selectedNode.data.model || 'gpt-4'}
-                onChange={(value) => handlePropertyChange('model', value)}
+                onChange={(e) => handlePropertyChange('model', e.target.value)}
                 options={[
                   { value: 'gpt-4', label: 'GPT-4' },
                   { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
@@ -76,7 +77,7 @@ export default function NodePropertiesPanel({
                 label="最大令牌数"
                 type="number"
                 value={selectedNode.data.maxTokens || 1000}
-                onChange={(e) => handlePropertyChange('maxTokens', parseInt(e.target.value))}
+                onChange={(e) => handlePropertyChange('maxTokens', parseInt(e.target!.value))}
               />
             </div>
 
@@ -87,7 +88,7 @@ export default function NodePropertiesPanel({
               </label>
               <Select
                 value={selectedNode.data.outputFormat || 'text'}
-                onChange={(value) => handlePropertyChange('outputFormat', value)}
+                onChange={(e) => handlePropertyChange('outputFormat', e.target.value)}
                 options={[
                   { value: 'text', label: '文本' },
                   { value: 'json', label: 'JSON' },
@@ -119,7 +120,7 @@ export default function NodePropertiesPanel({
                   <div className="text-sm text-gray-600 mb-2">
                     可用的工具:
                   </div>
-                  
+
                   {/* 预设工具 */}
                   {[
                     { name: 'web_search', description: '网页搜索', enabled: false },
@@ -153,7 +154,7 @@ export default function NodePropertiesPanel({
             {/* 高级配置 */}
             <div className="border-t pt-4">
               <div className="text-sm font-medium text-gray-700 mb-3">高级配置</div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <Input
                   label="Top P"
@@ -163,7 +164,6 @@ export default function NodePropertiesPanel({
                   min={0}
                   max={1}
                   step={0.1}
-                  className="text-sm"
                 />
 
                 <Input
@@ -174,7 +174,6 @@ export default function NodePropertiesPanel({
                   min={-2}
                   max={2}
                   step={0.1}
-                  className="text-sm"
                 />
               </div>
             </div>
@@ -183,7 +182,6 @@ export default function NodePropertiesPanel({
               label="系统提示"
               value={selectedNode.data.systemPrompt || ''}
               onChange={(e) => handlePropertyChange('systemPrompt', e.target.value)}
-              rows={3}
               placeholder="输入系统提示..."
             />
 
@@ -191,7 +189,6 @@ export default function NodePropertiesPanel({
               label="用户提示"
               value={selectedNode.data.userPrompt || ''}
               onChange={(e) => handlePropertyChange('userPrompt', e.target.value)}
-              rows={3}
               placeholder="输入用户提示..."
             />
 
@@ -522,14 +519,9 @@ export default function NodePropertiesPanel({
                 请求头 (JSON格式)
               </label>
               <textarea
-                value={selectedNode.data.headers ? JSON.stringify(selectedNode.data.headers, null, 2) : '{}'}
+                value={selectedNode.data.headers}
                 onChange={(e) => {
-                  try {
-                    const headers = JSON.parse(e.target.value);
-                    handlePropertyChange('headers', headers);
-                  } catch (err) {
-                    // 暂时忽略解析错误，允许用户输入
-                  }
+                  handlePropertyChange('headers', e.target.value);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
                 rows={4}
@@ -540,40 +532,40 @@ export default function NodePropertiesPanel({
             {(selectedNode.data.method === 'POST' ||
               selectedNode.data.method === 'PUT' ||
               selectedNode.data.method === 'PATCH') && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    请求体类型
-                  </label>
-                  <select
-                    value={selectedNode.data.bodyType || 'json'}
-                    onChange={(e) => handlePropertyChange('bodyType', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="json">JSON</option>
-                    <option value="form">Form Data</option>
-                    <option value="text">Text</option>
-                  </select>
-                </div>
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      请求体类型
+                    </label>
+                    <select
+                      value={selectedNode.data.bodyType || 'json'}
+                      onChange={(e) => handlePropertyChange('bodyType', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="json">JSON</option>
+                      <option value="form">Form Data</option>
+                      <option value="text">Text</option>
+                    </select>
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    请求体
-                  </label>
-                  <VariableInput
-                    value={selectedNode.data.body || ''}
-                    onChange={(value) => handlePropertyChange('body', value)}
-                    variables={availableVariables || []}
-                    placeholder={selectedNode.data.bodyType === 'json' ?
-                      '{\n  "key": "{{value}}"\n}' :
-                      '支持变量引用: {{variable}}'
-                    }
-                    className="w-full"
-                    multiline
-                  />
-                </div>
-              </>
-            )}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      请求体
+                    </label>
+                    <VariableInput
+                      value={selectedNode.data.body || ''}
+                      onChange={(value) => handlePropertyChange('body', value)}
+                      variables={availableVariables || []}
+                      placeholder={selectedNode.data.bodyType === 'json' ?
+                        '{\n  "key": "{{value}}"\n}' :
+                        '支持变量引用: {{variable}}'
+                      }
+                      className="w-full"
+                      multiline
+                    />
+                  </div>
+                </>
+              )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

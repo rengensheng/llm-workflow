@@ -29,8 +29,8 @@ export interface Workflow {
   id: string;
   name: string;
   description?: string;
-  nodes: WorkflowNode[];
-  edges: WorkflowEdge[];
+  nodes?: WorkflowNode[];
+  edges?: WorkflowEdge[];
   variables: WorkflowVariable[];
   createdAt: string;
   updatedAt: string;

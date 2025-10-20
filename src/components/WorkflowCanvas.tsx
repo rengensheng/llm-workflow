@@ -2,8 +2,6 @@ import { useCallback, useEffect } from 'react';
 import {
   ReactFlow,
   addEdge,
-  useNodesState,
-  useEdgesState,
   useReactFlow,
   Controls,
   Background,
@@ -12,8 +10,8 @@ import {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-import type { WorkflowNode, WorkflowEdge } from '../types/workflow';
-import type { Node, Edge, Connection, NodeTypes } from 'reactflow';
+import type { WorkflowNode } from '../types/workflow';
+import type { Node, Edge, Connection, NodeTypes, NodeChange, EdgeChange } from 'reactflow';
 import { v4 as uuidv4 } from 'uuid';
 import LLMNode from './nodes/LLMNode';
 import ToolNode from './nodes/ToolNode';
@@ -34,49 +32,49 @@ const nodeTypes: NodeTypes = {
 };
 
 interface WorkflowCanvasProps {
-  initialNodes?: WorkflowNode[];
-  initialEdges?: WorkflowEdge[];
-  onNodesChange?: (nodes: WorkflowNode[]) => void;
-  onEdgesChange?: (edges: WorkflowEdge[]) => void;
+  nodes: Node<any, string | undefined>[];
+  edges: Edge<any>[];
+  setNodes: React.Dispatch<React.SetStateAction<Node<any, string | undefined>[]>>;
+  setEdges: React.Dispatch<React.SetStateAction<Edge<any>[]>>;
+  onNodesChangeInternal: (changes: NodeChange[]) => void;
+  onEdgesChangeInternal: (changes: EdgeChange[]) => void;
   onAddNode?: (node: WorkflowNode) => void;
   onNodeSelect?: (node: WorkflowNode | null) => void;
 }
 
 export default function WorkflowCanvas({
-  initialNodes = [],
-  initialEdges = [],
-  onNodesChange,
-  onEdgesChange,
+  nodes = [],
+  edges = [],
+  setNodes,
+  setEdges,
+  onNodesChangeInternal,
+  onEdgesChangeInternal,
   onAddNode,
   onNodeSelect,
 }: WorkflowCanvasProps) {
-  const [nodes, setNodes, onNodesChangeInternal] = useNodesState(initialNodes as Node[]);
-  const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(initialEdges as Edge[]);
+
   const { screenToFlowPosition } = useReactFlow();
 
   const onConnect = useCallback(
     (params: Connection) => {
       const newEdges = addEdge(params, edges);
       setEdges(newEdges);
-      onEdgesChange?.(newEdges as WorkflowEdge[]);
     },
-    [edges, setEdges, onEdgesChange]
+    [edges, setEdges]
   );
 
   const onNodesChangeCallback = useCallback(
     (changes: any) => {
       onNodesChangeInternal(changes);
-      onNodesChange?.(nodes as WorkflowNode[])
     },
-    [onNodesChangeInternal, onNodesChange, nodes]
+    [onNodesChangeInternal]
   );
 
   const onEdgesChangeCallback = useCallback(
     (changes: any) => {
       onEdgesChangeInternal(changes);
-      onEdgesChange?.(edges as WorkflowEdge[]);
     },
-    [onEdgesChangeInternal, onEdgesChange, edges]
+    [onEdgesChangeInternal]
   );
 
   const onDrop = useCallback(
@@ -124,10 +122,6 @@ export default function WorkflowCanvas({
   const onPaneClick = useCallback(() => {
     onNodeSelect?.(null);
   }, [onNodeSelect]);
-
-  // useEffect(() => {
-  //   setNodes(initialNodes)
-  // }, [initialNodes])
 
   return (
     <div className="w-full h-full" onDrop={onDrop} onDragOver={onDragOver}>

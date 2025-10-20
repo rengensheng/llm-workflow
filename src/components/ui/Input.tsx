@@ -7,12 +7,19 @@ export type InputVariant = 'default' | 'filled' | 'flushed';
 
 export interface InputProps extends Omit<ComponentProps<typeof HeadlessInput>, 'className' | 'size'> {
   label?: ReactNode;
+  type?: 'text' | 'email' | 'number';
   description?: ReactNode;
   error?: string;
   size?: InputSize;
   variant?: InputVariant;
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
+  value?: string|number|null;
+  placeholder?: string;
+  onChange: (e:React.ChangeEvent<HTMLInputElement>) => void;
+  min?: number;
+  max?: number;
+  step?: number;
 }
 
 const sizeStyles: Record<InputSize, string> = {

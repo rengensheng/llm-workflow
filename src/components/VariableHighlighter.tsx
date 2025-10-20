@@ -53,6 +53,7 @@ interface VariableInputProps {
   variables: WorkflowVariable[];
   placeholder?: string;
   className?: string;
+  multiline?: boolean;
 }
 
 export const VariableInput: React.FC<VariableInputProps> = ({

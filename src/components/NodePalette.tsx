@@ -19,6 +19,16 @@ const nodeTypes = [
     },
   },
   {
+    type: 'userOutput',
+    label: 'Output',
+    icon: Download,
+    color: 'red',
+    defaultData: {
+      label: 'Output',
+      outputType: 'text',
+    },
+  },
+  {
     type: 'llm',
     label: 'LLM',
     icon: Brain,
@@ -56,16 +66,6 @@ const nodeTypes = [
     },
   },
   {
-    type: 'userOutput',
-    label: 'Output',
-    icon: Download,
-    color: 'red',
-    defaultData: {
-      label: 'Output',
-      outputType: 'text',
-    },
-  },
-  {
     type: 'loop',
     label: 'Loop',
     icon: Repeat,
@@ -93,7 +93,7 @@ const nodeTypes = [
       label: 'API Call',
       method: 'GET',
       url: '',
-      headers: {},
+      headers: '{}',
       body: '',
       bodyType: 'json',
       timeout: 5000,

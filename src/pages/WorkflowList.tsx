@@ -94,7 +94,7 @@ export default function WorkflowList() {
                     </h3>
                     <div className="flex items-center space-x-1">
                       <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                        {workflow.nodes.length} 节点
+                        {workflow.nodes!.length} 节点
                       </span>
                     </div>
                   </div>
