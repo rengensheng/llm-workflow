@@ -256,7 +256,7 @@ export default function NodePropertiesPanel({
           </div>
         );
 
-      case 'input':
+      case 'userInput':
         return (
           <div className="space-y-4">
             <div>
@@ -306,7 +306,7 @@ export default function NodePropertiesPanel({
           </div>
         );
 
-      case 'output':
+      case 'userOutput':
         return (
           <div className="space-y-4">
             <div>
@@ -632,7 +632,6 @@ export default function NodePropertiesPanel({
           {selectedNode.type.toUpperCase()} 节点
         </div>
       </div>
-
       <div className="p-4 space-y-4">
         <Input
           label="节点名称"

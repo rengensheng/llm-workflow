@@ -1,82 +1,112 @@
-import React from 'react';
-import { cn, baseInputClasses, inputSizeClasses } from './utils';
-import type { ComponentProps } from './types';
-import { componentColors, themeClasses } from './theme';
+import { Input as HeadlessInput, Field, Label, Description } from '@headlessui/react';
+import { motion } from 'framer-motion';
+import type { ComponentProps, ReactNode } from 'react';
 
-interface InputProps extends Omit<ComponentProps, 'size'>, React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
+export type InputSize = 'sm' | 'md' | 'lg';
+export type InputVariant = 'default' | 'filled' | 'flushed';
+
+export interface InputProps extends Omit<ComponentProps<typeof HeadlessInput>, 'className' | 'size'> {
+  label?: ReactNode;
+  description?: ReactNode;
   error?: string;
-  helperText?: string;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
+  size?: InputSize;
+  variant?: InputVariant;
+  leftIcon?: ReactNode;
+  rightIcon?: ReactNode;
 }
 
-export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({
-    label,
-    error,
-    helperText,
-    leftIcon,
-    rightIcon,
-    className,
-    size = 'md' as const,
-    disabled,
-    ...props
-  }, ref) => {
-    const hasError = !!error;
+const sizeStyles: Record<InputSize, string> = {
+  sm: 'h-8 px-3 text-sm',
+  md: 'h-10 px-4 text-base',
+  lg: 'h-12 px-5 text-lg',
+};
 
-    return (
-      <div className="w-full">
-        {label && (
-          <label
-            htmlFor={props.id}
-            className={cn(
-              'block text-sm font-medium mb-1',
-              hasError ? componentColors.input.label.error : componentColors.input.label.default
-            )}
-          >
-            {label}
-          </label>
+const variantStyles: Record<InputVariant, string> = {
+  default: `
+    border-2 border-gray-300 dark:border-gray-600
+    bg-white dark:bg-gray-800
+    rounded-lg
+    focus:border-blue-500 dark:focus:border-blue-500
+  `,
+  filled: `
+    border-2 border-transparent
+    bg-gray-100 dark:bg-gray-700
+    rounded-lg
+    focus:border-blue-500 dark:focus:border-blue-500
+    focus:bg-white dark:focus:bg-gray-800
+  `,
+  flushed: `
+    border-0 border-b-2 border-gray-300 dark:border-gray-600
+    bg-transparent
+    rounded-none
+    focus:border-blue-500 dark:focus:border-blue-500
+    px-0
+  `,
+};
+
+export function Input({
+  label,
+  description,
+  error,
+  size = 'md',
+  variant = 'default',
+  leftIcon,
+  rightIcon,
+  disabled,
+  ...props
+}: InputProps) {
+  const hasError = !!error;
+
+  return (
+    <Field className="w-full">
+      {label && (
+        <Label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1.5">
+          {label}
+        </Label>
+      )}
+      <div className="relative">
+        {leftIcon && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">
+            {leftIcon}
+          </div>
         )}
-        <div className="relative">
-          {leftIcon && (
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <span className={componentColors.input.icon.default}>{leftIcon}</span>
-            </div>
-          )}
-          <input
-            ref={ref}
-            className={cn(
-              baseInputClasses,
-              inputSizeClasses[size as keyof typeof inputSizeClasses],
-              leftIcon && 'pl-10',
-              rightIcon && 'pr-10',
-              hasError && cn(componentColors.input.field.error.border, componentColors.input.field.error.focus),
-              disabled && cn(themeClasses.interactive.disabled.opacity, themeClasses.interactive.disabled.cursor),
-              className
-            )}
-            disabled={disabled}
-            {...props}
-          />
-          {rightIcon && (
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-              <span className={componentColors.input.icon.default}>{rightIcon}</span>
-            </div>
-          )}
-        </div>
-        {(error || helperText) && (
-          <p
-            className={cn(
-              'mt-1 text-sm',
-              error ? componentColors.input.helper.error : componentColors.input.helper.default
-            )}
-          >
-            {error || helperText}
-          </p>
+        <HeadlessInput
+          disabled={disabled}
+          className={`
+            w-full
+            ${sizeStyles[size]}
+            ${variantStyles[variant]}
+            ${leftIcon && variant !== 'flushed' ? 'pl-10' : ''}
+            ${rightIcon && variant !== 'flushed' ? 'pr-10' : ''}
+            ${hasError ? 'border-red-500 dark:border-red-500 focus:border-red-500 dark:focus:border-red-500' : ''}
+            text-gray-900 dark:text-gray-100
+            placeholder:text-gray-400 dark:placeholder:text-gray-500
+            transition-all duration-200
+            focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-0
+            disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 dark:disabled:bg-gray-900
+          `}
+          {...props}
+        />
+        {rightIcon && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">
+            {rightIcon}
+          </div>
         )}
       </div>
-    );
-  }
-);
-
-Input.displayName = 'Input';
+      {description && !hasError && (
+        <Description className="mt-1.5 text-sm text-gray-600 dark:text-gray-400">
+          {description}
+        </Description>
+      )}
+      {hasError && (
+        <motion.p
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-1.5 text-sm text-red-500 dark:text-red-400"
+        >
+          {error}
+        </motion.p>
+      )}
+    </Field>
+  );
+}

@@ -42,7 +42,7 @@ export default function WorkflowBuilder() {
 
   const handleNodeSelect = useCallback((node: WorkflowNode | null) => {
     setSelectedNode(node);
-  }, []);
+  }, [workflow]);
 
   const handleUpdateNode = useCallback((nodeId: string, updates: Partial<WorkflowNode>) => {
     const oldNode = workflow.nodes.find(node => node.id === nodeId);
@@ -69,12 +69,10 @@ export default function WorkflowBuilder() {
       if (oldVariableName !== newVariableName) {
         setWorkflow(prev => {
           let updatedVariables = [...prev.variables];
-          
           // 删除旧的变量
           if (oldVariableName) {
             updatedVariables = updatedVariables.filter(v => !(v.name === oldVariableName && v.nodeId === nodeId));
           }
-          
           // 创建新的变量
           if (newVariableName) {
             const newVariable: WorkflowVariable = {
@@ -214,8 +212,8 @@ export default function WorkflowBuilder() {
     }
 
     // Check if there's at least one input and output node
-    const hasInput = workflow.nodes.some(node => node.type === 'input');
-    const hasOutput = workflow.nodes.some(node => node.type === 'output');
+    const hasInput = workflow.nodes.some(node => node.type === 'userInput');
+    const hasOutput = workflow.nodes.some(node => node.type === 'userOutput');
 
     if (!hasInput) {
       alert('Please add an input node to start the workflow');
@@ -268,7 +266,6 @@ export default function WorkflowBuilder() {
             />
           </ReactFlowProvider>
         </div>
-
         {/* Node Properties Panel */}
         <NodePropertiesPanel
           selectedNode={selectedNode}

@@ -1,68 +1,117 @@
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
-import { cn } from './utils';
-import type { ComponentProps } from './types';
+import {
+  Tab,
+  TabGroup,
+  TabList,
+  TabPanel,
+  TabPanels,
+} from '@headlessui/react';
+import { motion } from 'framer-motion';
+import type { ReactNode } from 'react';
 
-interface TabsProps extends Omit<ComponentProps, 'variant'> {
-  tabs: Array<{
-    label: string;
-    content: React.ReactNode;
-    disabled?: boolean;
-  }>;
-  defaultIndex?: number;
-  variant?: 'underline' | 'pills';
+export interface TabItem {
+  label: ReactNode;
+  icon?: ReactNode;
+  content: ReactNode;
+  disabled?: boolean;
 }
 
-export const Tabs: React.FC<TabsProps> = ({
-  tabs,
-  defaultIndex = 0,
-  variant = 'underline',
-  className,
-  ...props
-}) => {
-  const tabVariantClasses = {
-    underline: {
-      base: 'border-b border-gray-200',
-      tab: cn(
-        'border-b-2 border-transparent px-4 py-2 text-sm font-medium',
-        'text-gray-500 hover:text-gray-700 hover:border-gray-300',
-        'data-[selected]:border-blue-500 data-[selected]:text-blue-600',
-        'focus:outline-none'
-      ),
-    },
-    pills: {
-      base: 'space-x-1',
-      tab: cn(
-        'rounded-md px-3 py-2 text-sm font-medium',
-        'text-gray-500 hover:text-gray-700 hover:bg-gray-100',
-        'data-[selected]:bg-blue-100 data-[selected]:text-blue-700',
-        'focus:outline-none'
-      ),
-    },
-  };
+export interface TabsProps {
+  items: TabItem[];
+  variant?: 'default' | 'pills' | 'underline';
+  defaultIndex?: number;
+  onChange?: (index: number) => void;
+}
+
+const variantStyles = {
+  default: {
+    list: 'flex space-x-1 rounded-lg bg-gray-100 dark:bg-gray-800 p-1',
+    tab: `
+      w-full rounded-md py-2.5 px-3 text-sm font-medium
+      transition-all duration-200
+      focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-100
+      dark:focus:ring-offset-gray-800
+      data-[selected]:bg-white data-[selected]:shadow
+      dark:data-[selected]:bg-gray-700
+      data-[selected]:text-blue-600 dark:data-[selected]:text-blue-400
+      data-[hover]:bg-white/[0.5] dark:data-[hover]:bg-gray-700/50
+      text-gray-600 dark:text-gray-400
+      data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed
+    `,
+    content: 'inline-flex items-center justify-center gap-2',
+  },
+  pills: {
+    list: 'flex space-x-2',
+    tab: `
+      rounded-full py-2.5 px-4 text-sm font-medium
+      transition-all duration-200
+      focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-2
+      data-[selected]:bg-blue-500 dark:data-[selected]:bg-blue-600
+      data-[selected]:text-white
+      data-[hover]:bg-gray-100 dark:data-[hover]:bg-gray-700
+      data-[selected]:data-[hover]:bg-blue-600 dark:data-[selected]:data-[hover]:bg-blue-700
+      text-gray-600 dark:text-gray-400
+      data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed
+    `,
+    content: 'inline-flex items-center justify-center gap-2',
+  },
+  underline: {
+    list: 'flex space-x-6 border-b-2 border-gray-200 dark:border-gray-700',
+    tab: `
+      relative py-3 px-1 text-sm font-medium
+      transition-all duration-200
+      focus:outline-none
+      data-[selected]:text-blue-600 dark:data-[selected]:text-blue-400
+      data-[hover]:text-gray-900 dark:data-[hover]:text-gray-100
+      text-gray-600 dark:text-gray-400
+      data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed
+    `,
+    content: 'relative inline-flex items-center gap-2',
+  },
+};
+
+export function Tabs({ items, variant = 'default', defaultIndex = 0, onChange }: TabsProps) {
+  const styles = variantStyles[variant];
 
   return (
-    <TabGroup defaultIndex={defaultIndex} className={cn('w-full', className)} {...props}>
-      <TabList className={cn('flex', tabVariantClasses[variant].base)}>
-        {tabs.map((tab, index) => (
-          <Tab
-            key={index}
-            disabled={tab.disabled}
-            className={cn(
-              tabVariantClasses[variant].tab,
-              tab.disabled && 'opacity-50 cursor-not-allowed'
+    <TabGroup defaultIndex={defaultIndex} onChange={onChange}>
+      <TabList className={styles.list}>
+        {items.map((item, index) => (
+          <Tab key={index} disabled={item.disabled} className={styles.tab}>
+            {({ selected }) => (
+              <div className={styles.content}>
+                {item.icon && <span className="flex-shrink-0">{item.icon}</span>}
+                <span>{item.label}</span>
+                {variant === 'underline' && selected && (
+                  <motion.div
+                    layoutId="activeTab"
+                    className="absolute -bottom-[14px] left-0 right-0 h-0.5 bg-blue-500 dark:bg-blue-400"
+                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                  />
+                )}
+              </div>
             )}
-          >
-            {tab.label}
           </Tab>
         ))}
       </TabList>
       <TabPanels className="mt-4">
-        {tabs.map((tab, index) => (
-          <TabPanel key={index} className="focus:outline-none">
-            {tab.content}
+        {items.map((item, index) => (
+          <TabPanel
+            key={index}
+            className="
+              focus:outline-none
+              transition-opacity duration-200
+            "
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {item.content}
+            </motion.div>
           </TabPanel>
         ))}
       </TabPanels>
     </TabGroup>
   );
-};
+}

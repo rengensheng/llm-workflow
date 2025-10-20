@@ -43,7 +43,7 @@ export default function WorkflowToolbar({ onSave, onRun, workflow, onToggleVaria
       }
     };
     reader.readAsText(file);
-    
+
     // Reset input
     event.target.value = '';
   };
@@ -67,9 +67,8 @@ export default function WorkflowToolbar({ onSave, onRun, workflow, onToggleVaria
         variant="secondary"
         size="md"
         onClick={handleExport}
-        className="flex items-center space-x-2"
+        leftIcon={<Download className="w-4 h-4" />}
       >
-        <Download className="w-4 h-4" />
         <span>Export</span>
       </Button>
 
@@ -78,9 +77,9 @@ export default function WorkflowToolbar({ onSave, onRun, workflow, onToggleVaria
         variant="primary"
         size="md"
         onClick={onSave}
-        className="flex items-center space-x-2"
+        leftIcon={<Save className="w-4 h-4" />}
       >
-        <Save className="w-4 h-4" />
+
         <span>Save</span>
       </Button>
 
@@ -89,9 +88,8 @@ export default function WorkflowToolbar({ onSave, onRun, workflow, onToggleVaria
         variant="primary"
         size="md"
         onClick={onRun}
-        className="flex items-center space-x-2 bg-green-600 hover:bg-green-700"
+        leftIcon={<Play className="w-4 h-4" />}
       >
-        <Play className="w-4 h-4" />
         <span>Run</span>
       </Button>
 
@@ -100,9 +98,8 @@ export default function WorkflowToolbar({ onSave, onRun, workflow, onToggleVaria
         variant="secondary"
         size="md"
         onClick={onToggleVariables}
-        className="flex items-center space-x-2"
+        leftIcon={<Variable className="w-4 h-4" />}
       >
-        <Variable className="w-4 h-4" />
         <span>Variables</span>
       </Button>
 
@@ -110,9 +107,8 @@ export default function WorkflowToolbar({ onSave, onRun, workflow, onToggleVaria
       <Button
         variant="secondary"
         size="md"
-        className="flex items-center space-x-2"
+        leftIcon={<Settings className="w-4 h-4" />}
       >
-        <Settings className="w-4 h-4" />
         <span>Settings</span>
       </Button>
     </div>

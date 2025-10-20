@@ -1,79 +1,109 @@
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { ChevronDownIcon } from 'lucide-react';
-import { cn } from './utils';
-import type { ComponentProps } from './types';
+import {
+  Menu,
+  MenuButton,
+  MenuItems,
+  MenuItem,
+  MenuSection,
+  MenuHeading,
+  MenuSeparator,
+} from '@headlessui/react';
+import { motion } from 'framer-motion';
+import { Check } from 'lucide-react';
+import type { ComponentProps, ReactNode } from 'react';
 
-interface DropdownMenuProps extends ComponentProps {
-  items: Array<{
-    label: string;
-    onClick?: () => void;
-    disabled?: boolean;
-    icon?: React.ReactNode;
-  }>;
-  trigger?: React.ReactNode;
-  align?: 'left' | 'right';
+export interface DropdownMenuItemType {
+  label: ReactNode;
+  icon?: ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+  selected?: boolean;
+  destructive?: boolean;
 }
 
-export const DropdownMenu: React.FC<DropdownMenuProps> = ({
-  items,
-  trigger,
-  align = 'left',
-  className,
-  size = 'md',
-  variant = 'primary',
-  ...props
-}) => {
+export interface DropdownMenuSectionType {
+  heading?: string;
+  items: DropdownMenuItemType[];
+}
+
+export interface DropdownMenuProps {
+  trigger: ReactNode;
+  sections: DropdownMenuSectionType[];
+}
+
+export function DropdownMenu({ trigger, sections }: DropdownMenuProps) {
   return (
-    <Menu as="div" className={cn('relative inline-block text-left', className)} {...props}>
-      <MenuButton
-        className={cn(
-          'inline-flex items-center justify-center font-medium rounded-md transition-colors duration-150',
-          size === 'sm' && 'h-8 px-3 text-sm',
-          size === 'md' && 'h-10 px-4 text-base',
-          size === 'lg' && 'h-12 px-6 text-lg',
-          variant === 'primary' && 'bg-blue-600 text-white hover:bg-blue-700',
-          variant === 'secondary' && 'bg-gray-600 text-white hover:bg-gray-700',
-          variant === 'ghost' && 'bg-transparent text-gray-700 hover:bg-gray-100',
-          'focus:outline-none'
-        )}
-      >
-        {trigger || (
-          <>
-            Options
-            <ChevronDownIcon className="ml-2 h-4 w-4" />
-          </>
-        )}
-      </MenuButton>
+    <Menu>
+      <MenuButton as="div">{trigger}</MenuButton>
 
       <MenuItems
-        className={cn(
-          'absolute z-50 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none',
-          align === 'left' && 'left-0',
-          align === 'right' && 'right-0'
-        )}
+        anchor="bottom end"
+        transition
+        className="
+          mt-2 w-56
+          origin-top-right
+          bg-white dark:bg-gray-800
+          border-2 border-gray-200 dark:border-gray-700
+          rounded-lg shadow-lg
+          py-1
+          focus:outline-none
+          z-50
+          transition duration-200 ease-out
+          data-[closed]:scale-95 data-[closed]:opacity-0
+        "
       >
-        <div className="py-1">
-          {items.map((item, index) => (
-            <MenuItem key={index} disabled={item.disabled}>
-              {({ active, disabled }) => (
-                <button
-                  onClick={item.onClick}
-                  disabled={disabled}
-                  className={cn(
-                    'flex w-full items-center px-4 py-2 text-sm text-left',
-                    active && 'bg-gray-100 text-gray-900',
-                    disabled && 'opacity-50 cursor-not-allowed',
-                    !disabled && !active && 'text-gray-700'
-                  )}
-                >
-                  {item.icon && <span className="mr-3">{item.icon}</span>}
-                  {item.label}
-                </button>
-              )}
-            </MenuItem>
-          ))}
-        </div>
+        {sections.map((section, sectionIdx) => (
+          <MenuSection key={sectionIdx}>
+            {section.heading && (
+              <MenuHeading className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                {section.heading}
+              </MenuHeading>
+            )}
+            {section.items.map((item, itemIdx) => (
+              <MenuItem key={itemIdx} disabled={item.disabled}>
+                {({ focus, active }) => (
+                  <button
+                    onClick={item.onClick}
+                    className={`
+                      w-full flex items-center gap-3 px-3 py-2 text-sm
+                      ${
+                        item.destructive
+                          ? 'text-red-600 dark:text-red-400'
+                          : 'text-gray-900 dark:text-gray-100'
+                      }
+                      ${
+                        focus || active
+                          ? 'bg-blue-50 dark:bg-blue-900/20'
+                          : ''
+                      }
+                      ${item.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                      transition-colors duration-150
+                    `}
+                  >
+                    {item.icon && (
+                      <span className="flex-shrink-0 w-5 h-5">
+                        {item.icon}
+                      </span>
+                    )}
+                    <span className="flex-1 text-left">{item.label}</span>
+                    {item.selected && (
+                      <motion.span
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="flex-shrink-0"
+                      >
+                        <Check className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+                      </motion.span>
+                    )}
+                  </button>
+                )}
+              </MenuItem>
+            ))}
+            {sectionIdx < sections.length - 1 && (
+              <MenuSeparator className="my-1 h-px bg-gray-200 dark:bg-gray-700" />
+            )}
+          </MenuSection>
+        ))}
       </MenuItems>
     </Menu>
   );
-};
+}

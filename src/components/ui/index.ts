@@ -1,23 +1,19 @@
-// COMPONENTS
-export { DropdownMenu } from './DropdownMenu';
-export { Disclosure } from './Disclosure';
-export { Dialog } from './Dialog';
-export { Popover } from './Popover';
-export { Tabs } from './Tabs';
-export { Transition, FadeTransition, SlideUpTransition, ScaleTransition } from './Transition';
+// UI Component Library - Modern Tech Flat Design
+// 现代化科技感扁平化UI组件库
 
-// FORMS
-export { Button } from './Button';
-export { Checkbox } from './Checkbox';
-export { Combobox } from './Combobox';
-export { Fieldset } from './Fieldset';
-export { Input } from './Input';
-export { Listbox } from './Listbox';
-export { RadioGroup } from './RadioGroup';
-export { Select } from './Select';
-export { Switch } from './Switch';
-export { Textarea } from './Textarea';
-
-// UTILITIES
-export { cn } from './utils';
-export type { ComponentProps, VariantProps, SizeProps, StateProps } from './types';
+export * from './Button';
+export * from './Checkbox';
+export * from './Switch';
+export * from './RadioGroup';
+export * from './Input';
+export * from './Textarea';
+export * from './Select';
+export * from './Listbox';
+export * from './Combobox';
+export * from './Fieldset';
+export * from './DropdownMenu';
+export * from './Disclosure';
+export * from './Dialog';
+export * from './Popover';
+export * from './Tabs';
+export * from './design-system';

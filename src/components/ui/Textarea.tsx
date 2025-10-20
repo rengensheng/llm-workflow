@@ -1,70 +1,89 @@
-import React from 'react';
-import { cn, baseInputClasses } from './utils';
-import type { ComponentProps } from './types';
+import { Textarea as HeadlessTextarea, Field, Label, Description } from '@headlessui/react';
+import { motion } from 'framer-motion';
+import type { ComponentProps, ReactNode } from 'react';
 
-interface TextareaProps extends Omit<ComponentProps, 'size'>, React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  label?: string;
+export type TextareaVariant = 'default' | 'filled';
+
+export interface TextareaProps extends Omit<ComponentProps<typeof HeadlessTextarea>, 'className'> {
+  label?: ReactNode;
+  description?: ReactNode;
   error?: string;
-  helperText?: string;
-  size?: 'sm' | 'md' | 'lg';
+  variant?: TextareaVariant;
+  resize?: 'none' | 'vertical' | 'horizontal' | 'both';
 }
 
-export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({
-    label,
-    error,
-    helperText,
-    className,
-    size = 'md' as const,
-    disabled,
-    ...props
-  }, ref) => {
-    const hasError = !!error;
-    const sizeClasses = {
-      sm: 'px-3 py-2 text-sm min-h-[80px]',
-      md: 'px-4 py-3 text-base min-h-[100px]',
-      lg: 'px-4 py-3 text-lg min-h-[120px]',
-    };
+const variantStyles: Record<TextareaVariant, string> = {
+  default: `
+    border-2 border-gray-300 dark:border-gray-600
+    bg-white dark:bg-gray-800
+    rounded-lg
+    focus:border-blue-500 dark:focus:border-blue-500
+  `,
+  filled: `
+    border-2 border-transparent
+    bg-gray-100 dark:bg-gray-700
+    rounded-lg
+    focus:border-blue-500 dark:focus:border-blue-500
+    focus:bg-white dark:focus:bg-gray-800
+  `,
+};
 
-    return (
-      <div className="w-full">
-        {label && (
-          <label
-            htmlFor={props.id}
-            className={cn(
-              'block text-sm font-medium text-gray-700 mb-1',
-              hasError && 'text-red-600'
-            )}
-          >
-            {label}
-          </label>
-        )}
-        <textarea
-          ref={ref}
-          className={cn(
-            baseInputClasses,
-            sizeClasses[size as keyof typeof sizeClasses],
-            'resize-vertical',
-            hasError && 'border-red-500 focus:border-red-500 focus:ring-red-500',
-            disabled && 'opacity-50 cursor-not-allowed',
-            className
-          )}
-          disabled={disabled}
-          {...props}
-        />
-        {(error || helperText) && (
-          <p
-            className={cn(
-              'mt-1 text-sm',
-              error ? 'text-red-600' : 'text-gray-500'
-            )}
-          >
-            {error || helperText}
-          </p>
-        )}
-      </div>
-    );
-  }
-);
+const resizeStyles: Record<string, string> = {
+  none: 'resize-none',
+  vertical: 'resize-y',
+  horizontal: 'resize-x',
+  both: 'resize',
+};
 
-Textarea.displayName = 'Textarea';
+export function Textarea({
+  label,
+  description,
+  error,
+  variant = 'default',
+  resize = 'vertical',
+  disabled,
+  rows = 4,
+  ...props
+}: TextareaProps) {
+  const hasError = !!error;
+
+  return (
+    <Field className="w-full">
+      {label && (
+        <Label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1.5">
+          {label}
+        </Label>
+      )}
+      <HeadlessTextarea
+        disabled={disabled}
+        rows={rows}
+        className={`
+          w-full px-4 py-3 text-base
+          ${variantStyles[variant]}
+          ${resizeStyles[resize]}
+          ${hasError ? 'border-red-500 dark:border-red-500 focus:border-red-500 dark:focus:border-red-500' : ''}
+          text-gray-900 dark:text-gray-100
+          placeholder:text-gray-400 dark:placeholder:text-gray-500
+          transition-all duration-200
+          focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-0
+          disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 dark:disabled:bg-gray-900
+        `}
+        {...props}
+      />
+      {description && !hasError && (
+        <Description className="mt-1.5 text-sm text-gray-600 dark:text-gray-400">
+          {description}
+        </Description>
+      )}
+      {hasError && (
+        <motion.p
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-1.5 text-sm text-red-500 dark:text-red-400"
+        >
+          {error}
+        </motion.p>
+      )}
+    </Field>
+  );
+}

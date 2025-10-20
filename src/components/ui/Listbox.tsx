@@ -1,89 +1,138 @@
-import { Listbox as HeadlessListbox } from '@headlessui/react';
-import { CheckIcon, ChevronDownIcon } from 'lucide-react';
-import { cn, baseInputClasses, inputSizeClasses } from './utils';
-import type { ComponentProps } from './types';
-import { componentColors, themeClasses } from './theme';
+import {
+  Listbox as HeadlessListbox,
+  ListboxButton,
+  ListboxOptions,
+  ListboxOption,
+  Field,
+  Label,
+  Description,
+} from '@headlessui/react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Check, ChevronDown } from 'lucide-react';
+import type { ComponentProps, ReactNode } from 'react';
 
-interface ListboxProps extends ComponentProps {
-  options: Array<{
-    value: string;
-    label: string;
-    disabled?: boolean;
-  }>;
-  value?: string;
-  onChange?: (value: string) => void;
-  placeholder?: string;
-  name?: string;
+export interface ListboxOptionType {
+  value: string;
+  label: ReactNode;
+  description?: string;
+  disabled?: boolean;
 }
 
-export const Listbox: React.FC<ListboxProps> = ({
+export interface ListboxProps extends Omit<ComponentProps<typeof HeadlessListbox>, 'className'> {
+  label?: ReactNode;
+  description?: ReactNode;
+  error?: string;
+  options: ListboxOptionType[];
+  placeholder?: string;
+}
+
+export function Listbox({
+  label,
+  description,
+  error,
   options,
-  value,
-  onChange,
-  placeholder = 'Select an option...',
-  name,
-  className,
-  size = 'md',
+  placeholder = 'Select an option',
   disabled,
+  value,
   ...props
-}) => {
-  const selectedOption = options.find(option => option.value === value);
+}: ListboxProps) {
+  const hasError = !!error;
+  const selectedOption = options.find((opt) => opt.value === value);
 
   return (
-    <HeadlessListbox value={value} onChange={onChange} disabled={disabled} name={name}>
-      <div className={cn('relative', className)} {...props}>
-        <HeadlessListbox.Button
-          className={cn(
-            baseInputClasses,
-            inputSizeClasses[size],
-            'text-left pr-10',
-            disabled && themeClasses.interactive.disabled.opacity + ' ' + themeClasses.interactive.disabled.cursor
-          )}
-        >
-          <span className={cn('block truncate', !selectedOption && themeClasses.text.placeholder)}>
-            {selectedOption?.label || placeholder}
-          </span>
-          <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-            <ChevronDownIcon className="h-5 w-5 text-gray-400" />
-          </span>
-        </HeadlessListbox.Button>
+    <Field className="w-full">
+      {label && (
+        <Label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1.5">
+          {label}
+        </Label>
+      )}
+      <HeadlessListbox disabled={disabled} value={value} {...props}>
+        <div className="relative">
+          <ListboxButton
+            className={`
+              relative w-full h-10 px-4 text-left
+              border-2 border-gray-300 dark:border-gray-600
+              bg-white dark:bg-gray-800
+              rounded-lg
+              ${hasError ? 'border-red-500 dark:border-red-500' : 'focus:border-blue-500 dark:focus:border-blue-500'}
+              text-gray-900 dark:text-gray-100
+              transition-all duration-200
+              focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-0
+              disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 dark:disabled:bg-gray-900
+            `}
+          >
+            <span className="block truncate">
+              {selectedOption?.label || <span className="text-gray-400 dark:text-gray-500">{placeholder}</span>}
+            </span>
+            <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <ChevronDown className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+            </span>
+          </ListboxButton>
 
-        <HeadlessListbox.Options className={cn(
-          'absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md py-1 text-base focus:outline-none',
-          componentColors.dropdown.options.background,
-          themeClasses.shadow.dropdown
-        )}>
-          {options.map((option) => (
-            <HeadlessListbox.Option
-              key={option.value}
-              value={option.value}
-              disabled={option.disabled}
-              className={({ active, selected, disabled }) =>
-                cn(
-                  'relative cursor-default select-none py-2 pl-10 pr-4',
-                  active && cn(componentColors.dropdown.options.item.active.background, componentColors.dropdown.options.item.active.text),
-                  selected && cn(componentColors.dropdown.options.item.selected.background, componentColors.dropdown.options.item.selected.text),
-                  disabled && cn(componentColors.dropdown.options.item.disabled.opacity, componentColors.dropdown.options.item.disabled.cursor),
-                  !active && !selected && !disabled && cn(componentColors.dropdown.options.item.default.background, componentColors.dropdown.options.item.default.text)
-                )
-              }
+          <AnimatePresence>
+            <ListboxOptions
+              anchor="bottom start"
+              className="
+                mt-1 w-[var(--button-width)]
+                bg-white dark:bg-gray-800
+                border-2 border-gray-200 dark:border-gray-700
+                rounded-lg shadow-lg
+                max-h-60 overflow-auto
+                py-1
+                focus:outline-none
+                z-50
+              "
             >
-              {({ selected }) => (
-                <>
-                  <span className={cn('block truncate', selected && 'font-semibold')}>
-                    {option.label}
-                  </span>
-                  {selected && (
-                    <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                      <CheckIcon className="h-5 w-5" />
-                    </span>
+              {options.map((option) => (
+                <ListboxOption
+                  key={option.value}
+                  value={option.value}
+                  disabled={option.disabled}
+                  className="
+                    relative cursor-pointer select-none py-2 pl-10 pr-4
+                    text-gray-900 dark:text-gray-100
+                    data-[focus]:bg-blue-50 dark:data-[focus]:bg-blue-900/20
+                    data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50
+                  "
+                >
+                  {({ selected }) => (
+                    <>
+                      <div className="flex flex-col">
+                        <span className={`block truncate ${selected ? 'font-semibold' : 'font-normal'}`}>
+                          {option.label}
+                        </span>
+                        {option.description && (
+                          <span className="text-sm text-gray-500 dark:text-gray-400">
+                            {option.description}
+                          </span>
+                        )}
+                      </div>
+                      {selected && (
+                        <motion.span
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-500 dark:text-blue-400"
+                        >
+                          <Check className="w-5 h-5" />
+                        </motion.span>
+                      )}
+                    </>
                   )}
-                </>
-              )}
-            </HeadlessListbox.Option>
-          ))}
-        </HeadlessListbox.Options>
-      </div>
-    </HeadlessListbox>
+                </ListboxOption>
+              ))}
+            </ListboxOptions>
+          </AnimatePresence>
+        </div>
+      </HeadlessListbox>
+      {description && !hasError && (
+        <Description className="mt-1.5 text-sm text-gray-600 dark:text-gray-400">
+          {description}
+        </Description>
+      )}
+      {hasError && (
+        <p className="mt-1.5 text-sm text-red-500 dark:text-red-400">{error}</p>
+      )}
+    </Field>
   );
-};
+}

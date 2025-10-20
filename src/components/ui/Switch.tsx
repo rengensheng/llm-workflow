@@ -1,86 +1,100 @@
-import { Switch as HeadlessSwitch } from '@headlessui/react';
-import { cn } from './utils';
-import type { ComponentProps } from './types';
+import { Switch as HeadlessSwitch, Field, Label, Description } from '@headlessui/react';
+import { motion } from 'framer-motion';
+import type { ComponentProps, ReactNode } from 'react';
 
-interface SwitchProps extends ComponentProps {
-  checked?: boolean;
-  onChange?: (checked: boolean) => void;
-  label?: string;
-  name?: string;
+export type SwitchSize = 'sm' | 'md' | 'lg';
+
+export interface SwitchProps extends Omit<ComponentProps<typeof HeadlessSwitch>, 'className'> {
+  label?: ReactNode;
+  description?: ReactNode;
+  size?: SwitchSize;
 }
 
-export const Switch: React.FC<SwitchProps> = ({
-  checked,
-  onChange,
-  label,
-  name,
-  className,
-  disabled,
-  size = 'md',
-  ...props
-}) => {
-  const sizeClasses = {
-    sm: {
-      container: 'h-4 w-7',
-      thumb: 'h-3 w-3',
-      translate: 'translate-x-3',
-    },
-    md: {
-      container: 'h-6 w-11',
-      thumb: 'h-5 w-5',
-      translate: 'translate-x-5',
-    },
-    lg: {
-      container: 'h-8 w-14',
-      thumb: 'h-7 w-7',
-      translate: 'translate-x-6',
-    },
-  };
+const sizeStyles: Record<SwitchSize, { track: string; thumb: string; translateX: number }> = {
+  sm: { track: 'w-9 h-5', thumb: 'w-4 h-4', translateX: 16 },
+  md: { track: 'w-11 h-6', thumb: 'w-5 h-5', translateX: 20 },
+  lg: { track: 'w-14 h-7', thumb: 'w-6 h-6', translateX: 28 },
+};
 
-  return (
+export function Switch({
+  label,
+  description,
+  size = 'md',
+  disabled,
+  ...props
+}: SwitchProps) {
+  const content = (
     <HeadlessSwitch
-      checked={checked}
-      onChange={onChange}
-      name={name}
       disabled={disabled}
-      className={cn(
-        'group flex items-center gap-3 text-left',
-        disabled && 'opacity-50 cursor-not-allowed',
-        className
-      )}
+      className={`
+        group relative inline-flex ${sizeStyles[size].track} shrink-0
+        rounded-full border-2 border-transparent
+        transition-colors duration-200 ease-in-out
+        focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-2
+        dark:focus:ring-offset-gray-900
+        disabled:cursor-not-allowed disabled:opacity-50
+        data-[checked]:bg-blue-500 data-[checked]:dark:bg-blue-600
+        data-[hover]:data-[checked]:bg-blue-600 data-[hover]:data-[checked]:dark:bg-blue-700
+        bg-gray-200 dark:bg-gray-700
+        data-[hover]:bg-gray-300 dark:data-[hover]:bg-gray-600
+        cursor-pointer disabled:cursor-not-allowed
+      `}
       {...props}
     >
-      {({ checked: isChecked }) => (
-        <>
-          <div
-            className={cn(
-              'relative inline-flex items-center rounded-full transition-colors duration-200 ease-in-out',
-              sizeClasses[size].container,
-              isChecked ? 'bg-blue-600' : 'bg-gray-200',
-              'focus:outline-none'
-            )}
-          >
-            <span
-              className={cn(
-                'inline-block transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
-                sizeClasses[size].thumb,
-                isChecked ? sizeClasses[size].translate : 'translate-x-1'
-              )}
-            />
-          </div>
-          {label && (
-            <span
-              className={cn(
-                size === 'sm' && 'text-sm',
-                size === 'md' && 'text-base',
-                size === 'lg' && 'text-lg'
-              )}
-            >
-              {label}
-            </span>
-          )}
-        </>
+      {({ checked }) => (
+        <motion.span
+          initial={false}
+          animate={{
+            x: checked ? sizeStyles[size].translateX : 2,
+          }}
+          transition={{
+            type: 'spring',
+            stiffness: 500,
+            damping: 30,
+          }}
+          className={`
+            ${sizeStyles[size].thumb}
+            inline-block rounded-full
+            bg-white shadow-lg
+            ring-0
+            pointer-events-none
+          `}
+        />
       )}
     </HeadlessSwitch>
   );
-};
+
+  if (!label && !description) {
+    return content;
+  }
+
+  return (
+    <Field className="flex items-start gap-3">
+      {content}
+      <div className="flex-1">
+        {label && (
+          <Label
+            className={`
+              block font-medium text-gray-900 dark:text-gray-100
+              ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+              ${size === 'sm' ? 'text-sm' : size === 'md' ? 'text-base' : 'text-lg'}
+            `}
+          >
+            {label}
+          </Label>
+        )}
+        {description && (
+          <Description
+            className={`
+              block text-gray-600 dark:text-gray-400 mt-0.5
+              ${disabled ? 'opacity-50' : ''}
+              ${size === 'sm' ? 'text-xs' : 'text-sm'}
+            `}
+          >
+            {description}
+          </Description>
+        )}
+      </div>
+    </Field>
+  );
+}

@@ -1,37 +1,43 @@
-import { cn } from './utils';
-import type { ComponentProps } from './types';
+import { Fieldset as HeadlessFieldset, Legend } from '@headlessui/react';
+import type { ComponentProps, ReactNode } from 'react';
 
-interface FieldsetProps extends ComponentProps {
-  legend?: string;
-  description?: string;
+export interface FieldsetProps extends Omit<ComponentProps<typeof HeadlessFieldset>, 'className'> {
+  legend?: ReactNode;
+  description?: ReactNode;
+  disabled?: boolean;
 }
 
-export const Fieldset: React.FC<FieldsetProps> = ({
+export function Fieldset({
   legend,
   description,
+  disabled,
   children,
-  className,
   ...props
-}) => {
+}: FieldsetProps) {
   return (
-    <fieldset
-      className={cn(
-        'border border-gray-300 rounded-lg p-4 space-y-4',
-        className
-      )}
+    <HeadlessFieldset
+      disabled={disabled}
+      className={`
+        border-2 border-gray-200 dark:border-gray-700
+        bg-white dark:bg-gray-800
+        rounded-lg p-6
+        ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+      `}
       {...props}
     >
       {legend && (
-        <legend className="px-2 text-lg font-semibold text-gray-900">
+        <Legend className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
           {legend}
-        </legend>
+        </Legend>
       )}
       {description && (
-        <p className="text-sm text-gray-600 -mt-2">
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
           {description}
         </p>
       )}
-      {children}
-    </fieldset>
+      <div className="space-y-4">
+        {children}
+      </div>
+    </HeadlessFieldset>
   );
-};
+}

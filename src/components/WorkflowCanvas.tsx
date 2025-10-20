@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
   ReactFlow,
   addEdge,
@@ -66,7 +66,7 @@ export default function WorkflowCanvas({
   const onNodesChangeCallback = useCallback(
     (changes: any) => {
       onNodesChangeInternal(changes);
-      onNodesChange?.(nodes as WorkflowNode[]);
+      onNodesChange?.(nodes as WorkflowNode[])
     },
     [onNodesChangeInternal, onNodesChange, nodes]
   );
@@ -103,7 +103,6 @@ export default function WorkflowCanvas({
           position,
           data: nodeData.data,
         };
-
         setNodes((nds) => [...nds, newNode]);
         onAddNode?.(newNode);
       } catch (error) {
@@ -125,6 +124,10 @@ export default function WorkflowCanvas({
   const onPaneClick = useCallback(() => {
     onNodeSelect?.(null);
   }, [onNodeSelect]);
+
+  // useEffect(() => {
+  //   setNodes(initialNodes)
+  // }, [initialNodes])
 
   return (
     <div className="w-full h-full" onDrop={onDrop} onDragOver={onDragOver}>

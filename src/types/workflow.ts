@@ -1,6 +1,6 @@
 export interface WorkflowNode {
   id: string;
-  type: 'llm' | 'tool' | 'conditional' | 'input' | 'output' | 'knowledge' | 'loop' | 'api';
+  type: 'llm' | 'tool' | 'conditional' | 'userInput' | 'userOutput' | 'knowledge' | 'loop' | 'api';
   position: { x: number; y: number };
   data: {
     label: string;

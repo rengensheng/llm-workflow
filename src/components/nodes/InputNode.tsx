@@ -5,7 +5,6 @@ import BaseNode from './BaseNode';
 
 export default function InputNode(props: NodeProps<InputNodeData>) {
   const { data } = props;
-  console.log('data', props)
   const getInputTypeLabel = (inputType: string) => {
     switch (inputType) {
       case 'text':

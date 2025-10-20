@@ -1,89 +1,90 @@
-import { Listbox as HeadlessListbox } from '@headlessui/react';
-import { CheckIcon, ChevronDownIcon } from 'lucide-react';
-import { cn, baseInputClasses, inputSizeClasses } from './utils';
-import type { ComponentProps } from './types';
-import { componentColors, themeClasses } from './theme';
+import { Select as HeadlessSelect, Field, Label, Description } from '@headlessui/react';
+import { ChevronDown } from 'lucide-react';
+import type { ComponentProps, ReactNode } from 'react';
 
-interface SelectProps extends ComponentProps {
-  options: Array<{
-    value: string;
-    label: string;
-    disabled?: boolean;
-  }>;
-  value?: string;
-  onChange?: (value: string) => void;
-  placeholder?: string;
-  name?: string;
+export type SelectSize = 'sm' | 'md' | 'lg';
+
+export interface SelectOption {
+  value: string;
+  label: string;
+  disabled?: boolean;
 }
 
-export const Select: React.FC<SelectProps> = ({
-  options,
-  value,
-  onChange,
-  placeholder = 'Select an option...',
-  name,
-  className,
+export interface SelectProps extends Omit<ComponentProps<typeof HeadlessSelect>, 'className' | 'size'> {
+  label?: ReactNode;
+  description?: ReactNode;
+  error?: string;
+  size?: SelectSize;
+  options: SelectOption[];
+  placeholder?: string;
+}
+
+const sizeStyles: Record<SelectSize, string> = {
+  sm: 'h-8 px-3 text-sm',
+  md: 'h-10 px-4 text-base',
+  lg: 'h-12 px-5 text-lg',
+};
+
+export function Select({
+  label,
+  description,
+  error,
   size = 'md',
+  options,
+  placeholder,
   disabled,
   ...props
-}) => {
-  const selectedOption = options.find(option => option.value === value);
+}: SelectProps) {
+  const hasError = !!error;
 
   return (
-    <HeadlessListbox value={value} onChange={onChange} disabled={disabled} name={name}>
-      <div className={cn('relative', className)} {...props}>
-        <HeadlessListbox.Button
-          className={cn(
-            baseInputClasses,
-            inputSizeClasses[size],
-            'text-left pr-10',
-            disabled && themeClasses.interactive.disabled.opacity + ' ' + themeClasses.interactive.disabled.cursor
-          )}
+    <Field className="w-full">
+      {label && (
+        <Label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1.5">
+          {label}
+        </Label>
+      )}
+      <div className="relative">
+        <HeadlessSelect
+          disabled={disabled}
+          className={`
+            w-full appearance-none
+            ${sizeStyles[size]}
+            pr-10
+            border-2 border-gray-300 dark:border-gray-600
+            bg-white dark:bg-gray-800
+            rounded-lg
+            ${hasError ? 'border-red-500 dark:border-red-500 focus:border-red-500 dark:focus:border-red-500' : 'focus:border-blue-500 dark:focus:border-blue-500'}
+            text-gray-900 dark:text-gray-100
+            transition-all duration-200
+            focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-0
+            disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 dark:disabled:bg-gray-900
+          `}
+          {...props}
         >
-          <span className={cn('block truncate', !selectedOption && themeClasses.text.placeholder)}>
-            {selectedOption?.label || placeholder}
-          </span>
-          <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-            <ChevronDownIcon className="h-5 w-5 text-gray-400" />
-          </span>
-        </HeadlessListbox.Button>
-
-        <HeadlessListbox.Options className={cn(
-          'absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md py-1 text-base focus:outline-none',
-          componentColors.dropdown.options.background,
-          themeClasses.shadow.dropdown
-        )}>
+          {placeholder && (
+            <option value="" disabled>
+              {placeholder}
+            </option>
+          )}
           {options.map((option) => (
-            <HeadlessListbox.Option
-              key={option.value}
-              value={option.value}
-              disabled={option.disabled}
-              className={({ active, selected, disabled }) =>
-                cn(
-                  'relative cursor-default select-none py-2 pl-10 pr-4',
-                  active && cn(componentColors.dropdown.options.item.active.background, componentColors.dropdown.options.item.active.text),
-                  selected && cn(componentColors.dropdown.options.item.selected.background, componentColors.dropdown.options.item.selected.text),
-                  disabled && cn(componentColors.dropdown.options.item.disabled.opacity, componentColors.dropdown.options.item.disabled.cursor),
-                  !active && !selected && !disabled && cn(componentColors.dropdown.options.item.default.background, componentColors.dropdown.options.item.default.text)
-                )
-              }
-            >
-              {({ selected }) => (
-                <>
-                  <span className={cn('block truncate', selected && 'font-semibold')}>
-                    {option.label}
-                  </span>
-                  {selected && (
-                    <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                      <CheckIcon className="h-5 w-5" />
-                    </span>
-                  )}
-                </>
-              )}
-            </HeadlessListbox.Option>
+            <option key={option.value} value={option.value} disabled={option.disabled}>
+              {option.label}
+            </option>
           ))}
-        </HeadlessListbox.Options>
+        </HeadlessSelect>
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">
+          <ChevronDown size={18} />
+        </div>
       </div>
-    </HeadlessListbox>
+      {description && !hasError && (
+        <Description className="mt-1.5 text-sm text-gray-600 dark:text-gray-400">
+          {description}
+        </Description>
+      )}
+      {hasError && (
+        <p className="mt-1.5 text-sm text-red-500 dark:text-red-400">{error}</p>
+      )}
+    </Field>
   );
-};
+}
