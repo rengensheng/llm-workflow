@@ -46,35 +46,18 @@ export default function LoopNode({ data }: NodeProps<LoopNodeData>) {
           </div>
         </div>
         
-        {/* 循环配置内容 */}
+        {/* 数组循环配置内容 */}
         <div className="mt-3 pt-3 border-t border-gray-700">
           <div className="text-xs text-gray-400 space-y-1">
-            <div className="flex justify-between">
-              <span>类型:</span>
-              <span className="text-white">{data.loopType === 'count' ? '计数循环' : '条件循环'}</span>
-            </div>
-            {data.loopType === 'count' && data.maxIterations && (
-              <div className="flex justify-between">
-                <span>次数:</span>
-                <span className="text-white">{data.maxIterations}</span>
-              </div>
-            )}
-            {data.loopType === 'condition' && data.condition && (
-              <div className="truncate" title={data.condition}>
-                条件: {data.condition.substring(0, 25)}...
-              </div>
-            )}
-            {data.maxWordCount && (
-              <div className="flex justify-between">
-                <span>最大词语:</span>
-                <span className="text-white">{data.maxWordCount}</span>
-              </div>
-            )}
-            {data.runningConditions?.enabled && (
-              <div className="flex justify-between">
-                <span>运行条件:</span>
-                <span className="text-green-400">已启用</span>
-              </div>
+            {data.arrayVariable && (
+              <>
+                <div className="flex justify-between">
+                  <span>数组:</span>
+                  <span className="text-white truncate ml-2" title={data.arrayVariable}>
+                    {data.arrayVariable}
+                  </span>
+                </div>
+              </>
             )}
           </div>
         </div>

@@ -112,7 +112,7 @@ export interface OutputNodeData {
 
 export interface LoopNodeData {
   label: string;
-  loopType: 'count' | 'condition';
+  loopType: 'count' | 'condition' | 'array';
   maxIterations?: number;
   condition?: string;
   currentIteration?: number;
@@ -123,6 +123,10 @@ export interface LoopNodeData {
     condition: string;
     description?: string;
   };
+  // 数组循环相关字段
+  arrayVariable?: string; // 要循环的数组变量名
+  itemVariable?: string; // 当前循环项的变量名
+  indexVariable?: string; // 当前索引的变量名（可选）
 }
 
 export interface APINodeData {

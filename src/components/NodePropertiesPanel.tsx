@@ -1,7 +1,8 @@
 import { X } from 'lucide-react';
 import { Input, Select, Switch, Textarea } from './ui';
 import { VariableInput } from './VariableHighlighter';
-import type { WorkflowNode, WorkflowVariable } from '../types/workflow';
+import type { WorkflowNode, WorkflowVariable, JsonSchemaConfig as JsonSchemaConfigType } from '../types/workflow';
+import JsonSchemaConfigComponent from './JsonSchemaConfig';
 
 interface NodePropertiesPanelProps {
   selectedNode: WorkflowNode | null;
@@ -27,7 +28,7 @@ export default function NodePropertiesPanel({
     });
   };
 
-  const handlePropertyChange = (key: string, value: string | number | boolean) => {
+  const handlePropertyChange = (key: string, value: string | number | boolean | JsonSchemaConfigType | any) => {
     console.log('修改至', key, value)
     onUpdateNode(selectedNode.id, {
       data: { ...selectedNode.data, [key]: value },
@@ -97,8 +98,12 @@ export default function NodePropertiesPanel({
             </div>
 
             {selectedNode.data.outputFormat === 'json' && (
-              <div className="text-sm text-gray-500 p-2 border border-gray-200 rounded">
-                JSON Schema 配置功能暂未实现
+              <div className="border border-gray-200 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">JSON Schema 配置</h4>
+                <JsonSchemaConfigComponent
+                  config={selectedNode.data.jsonSchemaConfig || { fields: [] }}
+                  onChange={(config) => handlePropertyChange('jsonSchemaConfig', config)}
+                />
               </div>
             )}
 
@@ -326,154 +331,21 @@ export default function NodePropertiesPanel({
       case 'loop':
         return (
           <div className="space-y-4">
+            {/* 数组循环配置 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                循环类型
+                数组变量
               </label>
-              <select
-                value={selectedNode.data.loopType || 'count'}
-                onChange={(e) => handlePropertyChange('loopType', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="count">计数循环</option>
-                <option value="condition">条件循环</option>
-              </select>
-            </div>
-
-            {selectedNode.data.loopType === 'count' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  最大迭代次数
-                </label>
-                <input
-                  type="number"
-                  value={selectedNode.data.maxIterations || 5}
-                  onChange={(e) => handlePropertyChange('maxIterations', parseInt(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  min={1}
-                  max={100}
-                />
-              </div>
-            )}
-
-            {selectedNode.data.loopType === 'condition' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  循环条件
-                </label>
-                <VariableInput
-                  value={selectedNode.data.condition || ''}
-                  onChange={(value) => handlePropertyChange('condition', value)}
-                  variables={availableVariables || []}
-                  placeholder="例如: {{iteration}} < 10 或 {{item}}.length > 0"
-                  className="w-full"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  使用 {'{'}{'{'}变量名{'}'}{'}'} 格式引用变量
-                </p>
-              </div>
-            )}
-
-            {/* 最大词语数配置 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                最大词语数
-              </label>
-              <input
-                type="number"
-                value={selectedNode.data.maxWordCount || 1000}
-                onChange={(e) => handlePropertyChange('maxWordCount', parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                min={1}
-                max={10000}
-                placeholder="限制循环处理的总词语数"
+              <VariableInput
+                value={selectedNode.data.arrayVariable || ''}
+                onChange={(value) => handlePropertyChange('arrayVariable', value)}
+                variables={availableVariables || []}
+                placeholder="选择或输入数组变量名，例如: items"
+                className="w-full"
               />
               <p className="text-xs text-gray-500 mt-1">
-                限制循环处理的总词语数，防止无限循环
+                选择要循环遍历的数组变量
               </p>
-            </div>
-
-            {/* 运行条件配置 */}
-            <div className="border-t pt-4">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    运行条件
-                  </label>
-                  <p className="text-xs text-gray-500">
-                    控制循环是否运行的额外条件
-                  </p>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={selectedNode.data.runningConditions?.enabled || false}
-                  onChange={(e) => {
-                    const currentConditions = selectedNode.data.runningConditions || {
-                      enabled: false,
-                      condition: '',
-                      description: '',
-                    };
-                    handlePropertyChange('runningConditions', {
-                      ...currentConditions,
-                      enabled: e.target.checked,
-                    });
-                  }}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-              </div>
-
-              {selectedNode.data.runningConditions?.enabled && (
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      条件表达式
-                    </label>
-                    <VariableInput
-                      value={selectedNode.data.runningConditions.condition || ''}
-                      onChange={(value) => {
-                        const currentConditions = selectedNode.data.runningConditions || {
-                          enabled: true,
-                          condition: '',
-                          description: '',
-                        };
-                        handlePropertyChange('runningConditions', {
-                          ...currentConditions,
-                          condition: value,
-                        });
-                      }}
-                      variables={availableVariables || []}
-                      placeholder="例如: {{input}}.length > 0 && {{iteration}} < 5"
-                      className="w-full"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      使用 {'{'}{'{'}变量名{'}'}{'}'} 格式引用变量
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      条件描述
-                    </label>
-                    <input
-                      type="text"
-                      value={selectedNode.data.runningConditions.description || ''}
-                      onChange={(e) => {
-                        const currentConditions = selectedNode.data.runningConditions || {
-                          enabled: true,
-                          condition: '',
-                          description: '',
-                        };
-                        handlePropertyChange('runningConditions', {
-                          ...currentConditions,
-                          description: e.target.value,
-                        });
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="例如: 当输入不为空且迭代次数小于5时运行"
-                    />
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         );
