@@ -481,6 +481,132 @@ export default function NodePropertiesPanel({
           </div>
         );
 
+      case 'api':
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                请求方法
+              </label>
+              <select
+                value={selectedNode.data.method || 'GET'}
+                onChange={(e) => handlePropertyChange('method', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="DELETE">DELETE</option>
+                <option value="PATCH">PATCH</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                请求URL
+              </label>
+              <VariableInput
+                value={selectedNode.data.url || ''}
+                onChange={(value) => handlePropertyChange('url', value)}
+                variables={availableVariables || []}
+                placeholder="https://api.example.com/endpoint"
+                className="w-full"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                支持使用 {'{'}{'{'}变量名{'}'}{'}'} 格式引用变量
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                请求头 (JSON格式)
+              </label>
+              <textarea
+                value={selectedNode.data.headers ? JSON.stringify(selectedNode.data.headers, null, 2) : '{}'}
+                onChange={(e) => {
+                  try {
+                    const headers = JSON.parse(e.target.value);
+                    handlePropertyChange('headers', headers);
+                  } catch (err) {
+                    // 暂时忽略解析错误，允许用户输入
+                  }
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                rows={4}
+                placeholder='{\n  "Content-Type": "application/json",\n  "Authorization": "Bearer {{token}}"\n}'
+              />
+            </div>
+
+            {(selectedNode.data.method === 'POST' ||
+              selectedNode.data.method === 'PUT' ||
+              selectedNode.data.method === 'PATCH') && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    请求体类型
+                  </label>
+                  <select
+                    value={selectedNode.data.bodyType || 'json'}
+                    onChange={(e) => handlePropertyChange('bodyType', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="json">JSON</option>
+                    <option value="form">Form Data</option>
+                    <option value="text">Text</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    请求体
+                  </label>
+                  <VariableInput
+                    value={selectedNode.data.body || ''}
+                    onChange={(value) => handlePropertyChange('body', value)}
+                    variables={availableVariables || []}
+                    placeholder={selectedNode.data.bodyType === 'json' ?
+                      '{\n  "key": "{{value}}"\n}' :
+                      '支持变量引用: {{variable}}'
+                    }
+                    className="w-full"
+                    multiline
+                  />
+                </div>
+              </>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                超时时间 (毫秒)
+              </label>
+              <input
+                type="number"
+                value={selectedNode.data.timeout || 5000}
+                onChange={(e) => handlePropertyChange('timeout', parseInt(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min={0}
+                step={1000}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                输出变量名
+              </label>
+              <input
+                type="text"
+                value={selectedNode.data.outputVariable || ''}
+                onChange={(e) => handlePropertyChange('outputVariable', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="api_response"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                API响应结果将保存到此变量中
+              </p>
+            </div>
+          </div>
+        );
+
       default:
         return (
           <div className="text-gray-500 text-sm">

@@ -1,6 +1,6 @@
 export interface WorkflowNode {
   id: string;
-  type: 'llm' | 'tool' | 'conditional' | 'input' | 'output' | 'knowledge' | 'loop';
+  type: 'llm' | 'tool' | 'conditional' | 'input' | 'output' | 'knowledge' | 'loop' | 'api';
   position: { x: number; y: number };
   data: {
     label: string;
@@ -123,4 +123,15 @@ export interface LoopNodeData {
     condition: string;
     description?: string;
   };
+}
+
+export interface APINodeData {
+  label: string;
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  url: string;
+  headers?: Record<string, string>;
+  body?: string;
+  bodyType?: 'json' | 'form' | 'text';
+  timeout?: number;
+  outputVariable?: string;
 }
