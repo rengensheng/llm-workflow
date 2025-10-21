@@ -1,6 +1,6 @@
 export interface WorkflowNode {
   id: string;
-  type: 'llm' | 'tool' | 'conditional' | 'userInput' | 'userOutput' | 'knowledge' | 'loop' | 'api';
+  type: 'llm' | 'tool' | 'conditional' | 'userInput' | 'userOutput' | 'knowledge' | 'loop' | 'api' | 'workflow';
   position: { x: number; y: number };
   data: {
     label: string;
@@ -138,4 +138,13 @@ export interface APINodeData {
   bodyType?: 'json' | 'form' | 'text';
   timeout?: number;
   outputVariable?: string;
+}
+
+export interface WorkflowNodeData {
+  label: string;
+  workflowId?: string;
+  workflowName?: string;
+  inputMappings?: Record<string, string>; // 输入变量映射：工作流内部变量 -> 当前工作流变量
+  outputMappings?: Record<string, string>; // 输出变量映射：子工作流变量 -> 当前工作流变量
+  description?: string;
 }

@@ -1,4 +1,4 @@
-import { Brain, Wrench, GitBranch, Upload, Download, Repeat, Globe } from 'lucide-react';
+import { Brain, Wrench, GitBranch, Upload, Download, Repeat, Globe, Workflow } from 'lucide-react';
 import type { WorkflowNode } from '../types/workflow';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -100,6 +100,20 @@ const nodeTypes = [
       outputVariable: '',
     },
   },
+  {
+    type: 'workflow',
+    label: 'Workflow',
+    icon: Workflow,
+    color: 'pink',
+    defaultData: {
+      label: 'Workflow',
+      workflowId: '',
+      workflowName: '',
+      inputMappings: {},
+      outputMappings: {},
+      description: '',
+    },
+  },
 ];
 
 export default function NodePalette({ onAddNode }: NodePaletteProps) {
@@ -136,6 +150,7 @@ export default function NodePalette({ onAddNode }: NodePaletteProps) {
             red: 'border-red-400 text-red-600 hover:bg-red-50',
             orange: 'border-orange-400 text-orange-600 hover:bg-orange-50',
             indigo: 'border-indigo-400 text-indigo-600 hover:bg-indigo-50',
+            pink: 'border-pink-400 text-pink-600 hover:bg-pink-50',
           }[nodeType.color];
 
           return (

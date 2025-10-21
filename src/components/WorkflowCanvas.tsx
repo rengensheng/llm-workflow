@@ -20,6 +20,7 @@ import InputNode from './nodes/InputNode';
 import OutputNode from './nodes/OutputNode';
 import LoopNode from './nodes/LoopNode';
 import APINode from './nodes/APINode';
+import WorkflowChildNode from './nodes/WorkflowNode';
 
 const nodeTypes: NodeTypes = {
   llm: LLMNode,
@@ -29,6 +30,7 @@ const nodeTypes: NodeTypes = {
   userOutput: OutputNode,
   loop: LoopNode,
   api: APINode,
+  workflow: WorkflowChildNode,
 };
 
 interface WorkflowCanvasProps {
