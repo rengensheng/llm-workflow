@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { ReactFlowProvider, useNodesState, useEdgesState } from 'reactflow';
 import type { Workflow, WorkflowNode, WorkflowEdge, WorkflowVariable } from '../types/workflow';
 import { v4 as uuidv4 } from 'uuid';
@@ -24,10 +24,11 @@ export default function WorkflowBuilder() {
   const [selectedNode, setSelectedNode] = useState<WorkflowNode | null>(null);
   const [showVariablePanel, setShowVariablePanel] = useState(false);
 
-  const handleNodesChange = useCallback((nodes: WorkflowNode[]) => {
+  // 同步 nodes 到 workflow.nodes
+  useEffect(() => {
     setWorkflow(prev => ({
       ...prev,
-      nodes,
+      nodes: nodes as WorkflowNode[],
       updatedAt: new Date().toISOString(),
     }));
 
@@ -35,14 +36,23 @@ export default function WorkflowBuilder() {
     if (selectedNode) {
       const updatedNode = nodes.find(node => node.id === selectedNode.id);
       if (updatedNode) {
-        setSelectedNode(updatedNode);
+        setSelectedNode(updatedNode as WorkflowNode);
       }
     }
-  }, [selectedNode]);
+  }, [nodes, selectedNode]);
+
+  // 同步 edges 到 workflow.edges
+  useEffect(() => {
+    setWorkflow(prev => ({
+      ...prev,
+      edges: edges as WorkflowEdge[],
+      updatedAt: new Date().toISOString(),
+    }));
+  }, [edges]);
 
   const handleNodeSelect = useCallback((node: WorkflowNode | null) => {
     setSelectedNode(node);
-  }, [workflow]);
+  }, []);
 
   const handleUpdateNode = useCallback((nodeId: string, updates: Partial<WorkflowNode>) => {
     const oldNode = nodes.find(node => node.id === nodeId);
@@ -219,9 +229,9 @@ export default function WorkflowBuilder() {
   }, [workflow]);
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-full bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{workflow.name}</h1>
