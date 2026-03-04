@@ -25,21 +25,21 @@ export default function LLMNode(props: NodeProps<LLMNodeData>) {
       subtitle={`${data.model} • ${getOutputFormatIcon(data.outputFormat)}${data.outputFormat}`}
       gradient="from-blue-500 to-cyan-600"
     >
-      <div className="text-xs text-gray-400 space-y-2">
+      <div className="text-xs text-gray-600 space-y-2">
         <div className="flex justify-between items-center">
           <span>温度:</span>
-          <span className="text-cyan-400">{data.temperature}</span>
+          <span className="text-blue-600">{data.temperature}</span>
         </div>
-        
+
         <div className="flex justify-between items-center">
           <span>最大令牌:</span>
-          <span className="text-cyan-400">{data.maxTokens}</span>
+          <span className="text-blue-600">{data.maxTokens}</span>
         </div>
 
         {data.enableToolCalls && enabledToolsCount > 0 && (
           <div className="flex justify-between items-center">
             <span>工具调用:</span>
-            <span className="text-green-400">{enabledToolsCount} 个工具</span>
+            <span className="text-green-600">{enabledToolsCount} 个工具</span>
           </div>
         )}
 

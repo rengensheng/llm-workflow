@@ -17,7 +17,7 @@ export default function WorkflowNode(props: NodeProps<WorkflowNodeData>) {
       subtitle={data.workflowName || '未选择工作流'}
       gradient="from-purple-500 to-pink-600"
     >
-      <div className="text-xs text-gray-400 space-y-2">
+      <div className="text-xs text-gray-600 space-y-2">
         {data.description && (
           <div className="truncate" title={data.description}>
             {data.description}
@@ -26,12 +26,12 @@ export default function WorkflowNode(props: NodeProps<WorkflowNodeData>) {
 
         <div className="flex justify-between items-center">
           <span>输入映射:</span>
-          <span className="text-purple-400">{inputCount} 个变量</span>
+          <span className="text-purple-600">{inputCount} 个变量</span>
         </div>
 
         <div className="flex justify-between items-center">
           <span>输出映射:</span>
-          <span className="text-pink-400">{outputCount} 个变量</span>
+          <span className="text-pink-600">{outputCount} 个变量</span>
         </div>
       </div>
     </BaseNode>

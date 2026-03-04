@@ -9,17 +9,17 @@ export default function APINode(props: NodeProps<APINodeData>) {
   const getMethodColor = (method: string) => {
     switch (method) {
       case 'GET':
-        return 'text-blue-400';
+        return 'text-blue-600';
       case 'POST':
-        return 'text-green-400';
+        return 'text-green-600';
       case 'PUT':
-        return 'text-yellow-400';
+        return 'text-amber-600';
       case 'DELETE':
-        return 'text-red-400';
+        return 'text-red-600';
       case 'PATCH':
-        return 'text-purple-400';
+        return 'text-purple-600';
       default:
-        return 'text-gray-400';
+        return 'text-gray-600';
     }
   };
 
@@ -34,7 +34,7 @@ export default function APINode(props: NodeProps<APINodeData>) {
             {data.method}
           </span>
           {data.url && (
-            <span className="text-xs text-gray-400 truncate max-w-[120px]">
+            <span className="text-xs text-gray-500 truncate max-w-[120px]">
               {data.url}
             </span>
           )}
@@ -43,12 +43,12 @@ export default function APINode(props: NodeProps<APINodeData>) {
       gradient="from-indigo-500 to-purple-600"
     >
       {data.timeout && (
-        <div className="text-xs text-gray-400">
+        <div className="text-xs text-gray-600">
           超时: {data.timeout}ms
         </div>
       )}
       {data.outputVariable && (
-        <div className="text-xs text-gray-400">
+        <div className="text-xs text-gray-600">
           输出: {data.outputVariable}
         </div>
       )}

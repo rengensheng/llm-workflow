@@ -10,50 +10,47 @@ export default function LoopNode({ data }: NodeProps<LoopNodeData>) {
       <Handle
         type="target"
         position={Position.Top}
-        className="!w-2 !h-2 !rounded-full !border-2 border-white !bg-blue-500 opacity-70 hover:opacity-100 hover:scale-125 transition-all duration-200 shadow-lg z-50"
+        className="!w-2 !h-2 !rounded-full !border !border-gray-300 !bg-white hover:!bg-blue-100 hover:!border-blue-400 hover:!scale-110 transition-all duration-150 z-50"
         id="in"
       />
-      
+
       {/* 主节点容器 */}
       <div className="
-        relative bg-gray-900 rounded-xl p-4 min-w-[180px] 
-        border border-gray-700 shadow-2xl
-        hover:shadow-orange-500/20 hover:border-orange-400
-        transition-all duration-300 transform
-        backdrop-blur-sm bg-opacity-90
+        relative bg-white rounded-lg p-4 min-w-[180px]
+        border border-gray-200 shadow-sm
+        hover:shadow-md hover:border-gray-300
+        transition-all duration-150
       ">
-        {/* 渐变边框效果 */}
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 opacity-20 blur-sm -z-10" />
-        
         {/* 内容区域 */}
         <div className="flex items-start space-x-3">
           {/* 图标区域 */}
           <div className="
-            flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-r from-orange-500 to-red-600 
-            flex items-center justify-center text-white shadow-lg
+            flex-shrink-0 w-10 h-10 rounded-md
+            flex items-center justify-center text-orange-600
+            bg-orange-50 border border-orange-200
           ">
             <Repeat className="w-5 h-5" />
           </div>
-          
+
           {/* 文本区域 */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-white font-semibold text-sm truncate">
+            <h3 className="text-gray-900 font-medium text-sm truncate">
               {data.label}
             </h3>
-            <p className="text-gray-400 text-xs mt-1 truncate">
+            <p className="text-gray-500 text-xs mt-1 truncate">
               循环节点
             </p>
           </div>
         </div>
-        
+
         {/* 数组循环配置内容 */}
-        <div className="mt-3 pt-3 border-t border-gray-700">
-          <div className="text-xs text-gray-400 space-y-1">
+        <div className="mt-3 pt-3 border-t border-gray-100">
+          <div className="text-xs text-gray-600 space-y-1">
             {data.arrayVariable && (
               <>
                 <div className="flex justify-between">
                   <span>数组:</span>
-                  <span className="text-white truncate ml-2" title={data.arrayVariable}>
+                  <span className="text-gray-800 truncate ml-2" title={data.arrayVariable}>
                     {data.arrayVariable}
                   </span>
                 </div>
@@ -62,20 +59,20 @@ export default function LoopNode({ data }: NodeProps<LoopNodeData>) {
           </div>
         </div>
       </div>
-      
+
       {/* 输出 Handle - 两个输出：循环体和循环结束 */}
       <div className="absolute bottom-0 left-0 right-0 flex justify-between px-2 pb-1">
         <Handle
           type="source"
           position={Position.Left}
           id="body"
-          className="!w-2 !h-2 !rounded-full !border-2 border-white !bg-orange-500 opacity-70 hover:opacity-100 hover:scale-125 transition-all duration-200 shadow-lg"
+          className="!w-2 !h-2 !rounded-full !border !border-gray-300 !bg-white hover:!bg-orange-100 hover:!border-orange-400 hover:!scale-110 transition-all duration-150"
         />
         <Handle
           type="source"
           position={Position.Right}
           id="exit"
-          className="!w-2 !h-2 !rounded-full !border-2 border-white !bg-green-500 opacity-70 hover:opacity-100 hover:scale-125 transition-all duration-200 shadow-lg"
+          className="!w-2 !h-2 !rounded-full !border !border-gray-300 !bg-white hover:!bg-green-100 hover:!border-green-400 hover:!scale-110 transition-all duration-150"
         />
       </div>
     </div>

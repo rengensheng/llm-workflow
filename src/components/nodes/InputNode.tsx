@@ -29,7 +29,7 @@ export default function InputNode(props: NodeProps<InputNodeData>) {
       showOutputHandle={true}
     >
       {data.defaultValue && (
-        <div className="text-xs text-gray-400">
+        <div className="text-xs text-gray-600">
           <div className="truncate" title={data.defaultValue}>
             默认值: {data.defaultValue.substring(0, 25)}...
           </div>
