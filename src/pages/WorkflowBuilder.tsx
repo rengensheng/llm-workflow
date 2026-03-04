@@ -251,7 +251,9 @@ export default function WorkflowBuilder() {
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Node Palette */}
-        <NodePalette onAddNode={handleAddNode} />
+        <div className="flex-shrink-0 h-full overflow-hidden">
+          <NodePalette onAddNode={handleAddNode} />
+        </div>
 
         {/* Workflow Canvas */}
         <div className="flex-1">
